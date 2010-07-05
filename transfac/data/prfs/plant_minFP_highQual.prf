@@ -1,0 +1,355 @@
+ID P$ABI4_01
+MX localhost/matrices/matrixlib/P$ABI4_01
+MC 1.0
+CC 0.75
+//
+ID P$ATMYB15_01
+MX localhost/matrices/matrixlib/P$ATMYB15_01
+MC 0.99
+CC 0.75
+//
+ID P$CPRF1_01
+MX localhost/matrices/matrixlib/P$CPRF1_01
+MC 1.0
+CC 0.75
+//
+ID P$WRKY_Q2
+MX localhost/matrices/matrixlib/P$WRKY_Q2
+MC 0.95
+CC 0.75
+//
+ID P$TAF1_01
+MX localhost/matrices/matrixlib/P$TAF1_01
+MC 0.99
+CC 0.75
+//
+ID P$EMBP1_Q2
+MX localhost/matrices/matrixlib/P$EMBP1_Q2
+MC 1.0
+CC 0.75
+//
+ID P$AG_02
+MX localhost/matrices/matrixlib/P$AG_02
+MC 0.94
+CC 0.75
+//
+ID P$MADSA_Q2
+MX localhost/matrices/matrixlib/P$MADSA_Q2
+MC 0.95
+CC 0.75
+//
+ID P$AG_03
+MX localhost/matrices/matrixlib/P$AG_03
+MC 0.93
+CC 0.75
+//
+ID P$AGL15_01
+MX localhost/matrices/matrixlib/P$AGL15_01
+MC 0.93
+CC 0.75
+//
+ID P$TRAB1_Q2
+MX localhost/matrices/matrixlib/P$TRAB1_Q2
+MC 0.97
+CC 0.75
+//
+ID P$ABF_Q2
+MX localhost/matrices/matrixlib/P$ABF_Q2
+MC 0.99
+CC 0.75
+//
+ID P$ATMYB84_01
+MX localhost/matrices/matrixlib/P$ATMYB84_01
+MC 1.0
+CC 0.75
+//
+ID P$MYB80_01
+MX localhost/matrices/matrixlib/P$MYB80_01
+MC 1.0
+CC 0.75
+//
+ID P$PCF5_01
+MX localhost/matrices/matrixlib/P$PCF5_01
+MC 1.0
+CC 0.75
+//
+ID P$AGL1_02
+MX localhost/matrices/matrixlib/P$AGL1_02
+MC 0.93
+CC 0.75
+//
+ID P$EMBP1_02
+MX localhost/matrices/matrixlib/P$EMBP1_02
+MC 1.0
+CC 0.75
+//
+ID P$ATHB1_01
+MX localhost/matrices/matrixlib/P$ATHB1_01
+MC 0.99
+CC 0.75
+//
+ID P$AGL3_02
+MX localhost/matrices/matrixlib/P$AGL3_02
+MC 0.89
+CC 0.75
+//
+ID P$BZIP911_02
+MX localhost/matrices/matrixlib/P$BZIP911_02
+MC 1.0
+CC 0.75
+//
+ID P$AG_01
+MX localhost/matrices/matrixlib/P$AG_01
+MC 0.93
+CC 0.75
+//
+ID P$ID1_01
+MX localhost/matrices/matrixlib/P$ID1_01
+MC 0.95
+CC 0.75
+//
+ID P$GBP_Q6
+MX localhost/matrices/matrixlib/P$GBP_Q6
+MC 0.99
+CC 0.75
+//
+ID P$TAF1_Q2
+MX localhost/matrices/matrixlib/P$TAF1_Q2
+MC 1.0
+CC 0.75
+//
+ID P$CDC5_01
+MX localhost/matrices/matrixlib/P$CDC5_01
+MC 0.99
+CC 0.75
+//
+ID P$O2_01
+MX localhost/matrices/matrixlib/P$O2_01
+MC 0.92
+CC 0.75
+//
+ID P$ABF1_02
+MX localhost/matrices/matrixlib/P$ABF1_02
+MC 0.91
+CC 0.75
+//
+ID P$O2_02
+MX localhost/matrices/matrixlib/P$O2_02
+MC 1.0
+CC 0.75
+//
+ID P$HBP1A_Q2
+MX localhost/matrices/matrixlib/P$HBP1A_Q2
+MC 1.0
+CC 0.75
+//
+ID P$CG1_Q6
+MX localhost/matrices/matrixlib/P$CG1_Q6
+MC 0.99
+CC 0.75
+//
+ID P$ATHB5_01
+MX localhost/matrices/matrixlib/P$ATHB5_01
+MC 0.99
+CC 0.75
+//
+ID P$CPRF2_Q2
+MX localhost/matrices/matrixlib/P$CPRF2_Q2
+MC 1.0
+CC 0.75
+//
+ID P$HAHB4_01
+MX localhost/matrices/matrixlib/P$HAHB4_01
+MC 1.0
+CC 0.75
+//
+ID P$SPF1_Q2
+MX localhost/matrices/matrixlib/P$SPF1_Q2
+MC 1.0
+CC 0.75
+//
+ID P$ANT_01
+MX localhost/matrices/matrixlib/P$ANT_01
+MC 0.96
+CC 0.75
+//
+ID P$TGA1B_01
+MX localhost/matrices/matrixlib/P$TGA1B_01
+MC 1.0
+CC 0.75
+//
+ID P$ABF1_03
+MX localhost/matrices/matrixlib/P$ABF1_03
+MC 0.9
+CC 0.75
+//
+ID P$AGP1_01
+MX localhost/matrices/matrixlib/P$AGP1_01
+MC 1.0
+CC 0.75
+//
+ID P$O2_03
+MX localhost/matrices/matrixlib/P$O2_03
+MC 1.0
+CC 0.75
+//
+ID P$GBF_Q2
+MX localhost/matrices/matrixlib/P$GBF_Q2
+MC 0.97
+CC 0.75
+//
+ID P$HBPA1_Q6_01
+MX localhost/matrices/matrixlib/P$HBPA1_Q6_01
+MC 0.99
+CC 0.75
+//
+ID P$TGA1A_Q2_01
+MX localhost/matrices/matrixlib/P$TGA1A_Q2_01
+MC 0.91
+CC 0.75
+//
+ID P$BHLH66_01
+MX localhost/matrices/matrixlib/P$BHLH66_01
+MC 1.0
+CC 0.75
+//
+ID P$AGL3_01
+MX localhost/matrices/matrixlib/P$AGL3_01
+MC 0.91
+CC 0.75
+//
+ID P$CPRF_Q2
+MX localhost/matrices/matrixlib/P$CPRF_Q2
+MC 1.0
+CC 0.75
+//
+ID P$ATHB9_01
+MX localhost/matrices/matrixlib/P$ATHB9_01
+MC 0.98
+CC 0.75
+//
+ID P$BZIP910_02
+MX localhost/matrices/matrixlib/P$BZIP910_02
+MC 0.98
+CC 0.75
+//
+ID P$AGL1_01
+MX localhost/matrices/matrixlib/P$AGL1_01
+MC 0.94
+CC 0.75
+//
+ID P$CPRF2_01
+MX localhost/matrices/matrixlib/P$CPRF2_01
+MC 1.0
+CC 0.75
+//
+ID P$PIF3_01
+MX localhost/matrices/matrixlib/P$PIF3_01
+MC 0.98
+CC 0.75
+//
+ID P$MYBPH3_02
+MX localhost/matrices/matrixlib/P$MYBPH3_02
+MC 1.0
+CC 0.75
+//
+ID P$NAC691_01
+MX localhost/matrices/matrixlib/P$NAC691_01
+MC 0.9
+CC 0.75
+//
+ID P$AGL2_01
+MX localhost/matrices/matrixlib/P$AGL2_01
+MC 0.95
+CC 0.75
+//
+ID P$SBF1_01
+MX localhost/matrices/matrixlib/P$SBF1_01
+MC 0.96
+CC 0.75
+//
+ID P$AGL2_02
+MX localhost/matrices/matrixlib/P$AGL2_02
+MC 0.95
+CC 0.75
+//
+ID P$BZIP911_01
+MX localhost/matrices/matrixlib/P$BZIP911_01
+MC 1.0
+CC 0.75
+//
+ID P$PIF3_02
+MX localhost/matrices/matrixlib/P$PIF3_02
+MC 1.0
+CC 0.75
+//
+ID P$PEND_01
+MX localhost/matrices/matrixlib/P$PEND_01
+MC 0.98
+CC 0.75
+//
+ID P$MYBPH3_01
+MX localhost/matrices/matrixlib/P$MYBPH3_01
+MC 0.99
+CC 0.75
+//
+ID P$CPRF3_01
+MX localhost/matrices/matrixlib/P$CPRF3_01
+MC 1.0
+CC 0.75
+//
+ID P$BZIP910_01
+MX localhost/matrices/matrixlib/P$BZIP910_01
+MC 1.0
+CC 0.75
+//
+ID P$ABF1_01
+MX localhost/matrices/matrixlib/P$ABF1_01
+MC 0.95
+CC 0.75
+//
+ID P$AGL3_03
+MX localhost/matrices/matrixlib/P$AGL3_03
+MC 0.88
+CC 0.75
+//
+ID P$ATMYB77_01
+MX localhost/matrices/matrixlib/P$ATMYB77_01
+MC 0.99
+CC 0.75
+//
+ID P$ROM_Q2
+MX localhost/matrices/matrixlib/P$ROM_Q2
+MC 1.0
+CC 0.75
+//
+ID P$TGA1B_Q2
+MX localhost/matrices/matrixlib/P$TGA1B_Q2
+MC 0.99
+CC 0.75
+//
+ID P$OSBZ8_Q6
+MX localhost/matrices/matrixlib/P$OSBZ8_Q6
+MC 0.85
+CC 0.75
+//
+ID P$O2_Q2
+MX localhost/matrices/matrixlib/P$O2_Q2
+MC 0.94
+CC 0.75
+//
+ID P$MADSB_Q2
+MX localhost/matrices/matrixlib/P$MADSB_Q2
+MC 0.95
+CC 0.75
+//
+ID P$HBP1B_Q6
+MX localhost/matrices/matrixlib/P$HBP1B_Q6
+MC 0.96
+CC 0.75
+//
+ID P$ZAP1_01
+MX localhost/matrices/matrixlib/P$ZAP1_01
+MC 0.98
+CC 0.75
+//

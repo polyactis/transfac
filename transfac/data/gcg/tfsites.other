@@ -1,0 +1,87 @@
+TRANSFAC Release 9.2 - licensed - 2005-06-30, (C) Biobase GmbH
+
+GCG format sites file for other sequences.
+
+TRANSFAC GCG data files are:
+
+tfsites.arts
+tfsites.cons
+tfsites.fungi
+tfsites.insect
+tfsites.other
+tfsites.plant
+tfsites.vert
+tfsites.viral
+
+To use this file in findpatterns as the pattern file:
+
+      % findpatterns -data=tfsites.other
+
+identifier                  sequence                                                                                                                                                                                           TRANSFAC accession number
+------------------------    ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------     ----------------------------
+..
+ARHIZ$ROLB_01            0  atagcgggccaACTTTAagct                                                                                                                                                                          0 ! R08285
+CAEEL$CEH24_01           0  TCCTTCTCGATTTCAAAATGTCAACTAAACATATGCAACATATGTGCC                                                                                                                                               0 ! R08930
+CAEEL$COL19_01           0  TCTATCAAATGAAAAACGCATTTTTTTTCCTG                                                                                                                                                               0 ! R09137
+CAEEL$MEC3_01            0  ATATTCTT                                                                                                                                                                                       0 ! R08935
+CAEEL$MEC3_02            0  AAATTCAT                                                                                                                                                                                       0 ! R08936
+CAEEL$MEC3_03            0  AAATGCAT                                                                                                                                                                                       0 ! R08937
+CAEEL$MEC3_04            0  AGCTTCAT                                                                                                                                                                                       0 ! R08938
+CAEEL$MEC3_05            0  TTATTAAT                                                                                                                                                                                       0 ! R08939
+CAEEL$MEC3_06            0  ATATATTCT                                                                                                                                                                                      0 ! R08940
+CAEEL$MEC3_07            0  ATAATGAAT                                                                                                                                                                                      0 ! R08941
+CAEEL$MEC3_08            0  ATCTATTAT                                                                                                                                                                                      0 ! R08942
+CAEEL$MEC3_09            0  ATAATCGAT                                                                                                                                                                                      0 ! R08943
+CAEEL$MYO2_01            0  TAAAGTGGTTGTGTG                                                                                                                                                                                0 ! R08929
+CAEEL$MYO2_02            0  tctCGTTGTTTGCCGTcggatgtctgcc                                                                                                                                                                   0 ! R08933
+CAEEL$PHA4_01            0  gtgtcaaactctcTTATCAatcagtgctctttttctct                                                                                                                                                         0 ! R08934
+CAEEL$TRA1_01            0  TGGGTGGTT                                                                                                                                                                                      0 ! R16293
+DIDI$ALF_01              0  AACATGATTGGTTAGATAGATT                                                                                                                                                                         0 ! R04037
+DIDI$CP1_01              0  AAAGGAATGGGGGTTC                                                                                                                                                                               0 ! R00236
+DIDI$CP2_01              0  aGCGGGTGTGttaagttaGGGGTGGGttt                                                                                                                                                                  0 ! R01288
+DIDI$DG17_01             0  ATGTGTGTTCATGTGTGTTTGAGTGTGTT                                                                                                                                                                  0 ! R00276
+DIDI$DG17_02             0  TTGGGGGTATGGTGGAGTT                                                                                                                                                                            0 ! R00277
+DIDI$UDPGPP_01           0  TACACCCCAAATGGGGTAGT                                                                                                                                                                           0 ! R01531
+LP$LPS1B_01              0  AGCCCCCCT                                                                                                                                                                                      0 ! R03631
+LP$LPS1B_02              0  TGGGGGGCG                                                                                                                                                                                      0 ! R03632
+PL$H2A_01                0  CACCGTGTC                                                                                                                                                                                      0 ! R01741
+PL$H2A_02                0  CCAACAGAGGGAG                                                                                                                                                                                  0 ! R01742
+PM$H2BA_01               0  ATTTGCAT                                                                                                                                                                                       0 ! R00665
+PM$H2BA_02               0  ATTTGCATA                                                                                                                                                                                      0 ! R00666
+PSAM$U7SN_01             0  GACTTAA                                                                                                                                                                                        0 ! R01511
+PSAM$U7SN_02             0  CTAAAATATAC                                                                                                                                                                                    0 ! R01512
+PSAM$U7SN_03             0  AAATATAC                                                                                                                                                                                       0 ! R01513
+PSAM$U7SN_03             0  ATTAT                                                                                                                                                                                          0 ! R01513
+PSAM$U7SN_04             0  ATTGA                                                                                                                                                                                          0 ! R01514
+PSAM$U7SN_05             0  CCATTTATCTTT                                                                                                                                                                                   0 ! R01515
+SP$CY3A_01               0  cagaacagacgcaggccggtTGTGGTCatggttttaaaag                                                                                                                                                       0 ! R08077
+SP$EH4_01                0  AGGGGGCGCACTC                                                                                                                                                                                  0 ! R02983
+SP$H2B1_01               0  ATTTGCAT                                                                                                                                                                                       0 ! R00667
+SP$H2B1_02               0  ATTGG                                                                                                                                                                                          0 ! R00668
+SP$H2B1_03               0  ATTGG                                                                                                                                                                                          0 ! R00669
+SP$H2B1_04               0  ATTTGCAT                                                                                                                                                                                       0 ! R00670
+SP$H2B1_05               0  TATA                                                                                                                                                                                           0 ! R00671
+SP$H2BL1_01              0  AAGCTGCCAATCATA                                                                                                                                                                                0 ! R02455
+SP$H3_01                 0  TTGCCATGTAACCCATGTT                                                                                                                                                                            0 ! R01895
+SP$H3_02                 0  CATTTTATTGACTTTGCAC                                                                                                                                                                            0 ! R01896
+SP$H3_03                 0  CCTTCCCGTCA                                                                                                                                                                                    0 ! R01897
+SP$H3_04                 0  AAACAAAAGAG                                                                                                                                                                                    0 ! R01898
+SP$H3_05                 0  GGTTGACCAATCAAG                                                                                                                                                                                0 ! R01899
+SP$HH1B_01               0  CAAGTTTTAAATCTGATTCTGTA                                                                                                                                                                        0 ! R00661
+SP$LH4_01                0  GTAGGCGGCTCACTC                                                                                                                                                                                0 ! R02984
+SP$SPEC1_01              0  gcgtatggtCACGTGctttat                                                                                                                                                                          0 ! R02080
+SP$SPEC2A_01             0  gagctcctttcaaagagcacaacaagccctcAGATTAacattccatctcattcaaaaata                                                                                                                                   0 ! R04993
+SP$SPEC2A_02             0  aaaaaggattTAATCCttcactgaattggtgctcttgctatacattgttacctttctttgctccagTAATCTcaagc                                                                                                                  0 ! R04994
+SU$H2A21_01              0  GTTGACACGCTTGAAGAAATAGTTG                                                                                                                                                                      0 ! R01665
+SU$H2A21_02              0  GTTGACACGCTTGAAGAAATAGTTG                                                                                                                                                                      0 ! R01666
+SU$H2A22_01              0  TGTGACGCAGCGGTGGGTGACGACT                                                                                                                                                                      0 ! R01667
+SU$H2A22_02              0  TGTGACGCAGCGGTGGGTGACGACT                                                                                                                                                                      0 ! R01668
+SU$H2B21_01              0  CGCGGAGCACTGATGCAGCGCGGAT                                                                                                                                                                      0 ! R01661
+SU$H2B21_02              0  CGCGGAGCACTGATGCAGCGCGGAT                                                                                                                                                                      0 ! R01662
+SU$H2B22_01              0  CAATACGCAACGAAGCGAAGACGGA                                                                                                                                                                      0 ! R01663
+SU$H2B22_02              0  CAATACGCAACGAAGCGAAGACGGA                                                                                                                                                                      0 ! R01664
+TDNA$NOS_01              0  TGAGCtaagcacataCGTCAG                                                                                                                                                                          0 ! R01174
+TDNA$NOS_02              0  tgagctaagcacatACGTCAg                                                                                                                                                                          0 ! R01609
+TDNA$OCS_01              0  ACGTAAGCGCTTACGT                                                                                                                                                                               0 ! R01850
+TDNA$OCS_02              0  AAACGTAAGCGCTTACGTAC                                                                                                                                                                           0 ! R01919
+TDNA$TCYT_01             0  CCATGCCCCACACTTTGTTGAAAAACAAGT                                                                                                                                                                 0 ! R09926

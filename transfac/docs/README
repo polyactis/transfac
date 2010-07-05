@@ -1,0 +1,108 @@
+(TRANSFAC relates to version 9.2)
+
+2005-08-11
+	please check README in https://dl403k-1.cmb.usc.edu/research/annot/tf/
+
+1. src/
+
+This repositary contains programs to dump all TRANSFAC databases into postgresql
+database, to dump sequences downloaded into database, to output promoter
+sequence from database for TRANSFAC's match, to construct input profile file for
+TRANSFAC's match.
+
+PrepareTFdata.py: Parse Kangyu's TF result. Link its refseq_id to gene_id by
+	looking up the gene2accession file. The final gene-id to tf mapping goes
+	to a output table in schema graph.
+
+transfacdb.sql: tabel schema for all TRANSFAC data, promoter sequences, TRANSFAC
+	match's result.
+
+transfacdb.py: Put all TRANSFAC data and promoter sequences, TRANSFAC match's
+	result into the tables defined by transfacdb.sql.
+
+prom_seq_output.py: output promoter sequences in fasta format for TRANSFAC match
+
+ConstructTransfacProf.py: transforms the embl_profile into the match-format
+	profile.
+
+09-28-05
+
+at_tfdb.sql: Schema for at's tf information, which is from http://arabidopsis.med.ohio-state.edu/AtTFDB/Binding_Site_Table.jsp.
+	That website offers cisdb and tfdb. There're table DESCRIPTION for each
+	db. My at_tfdb merges them.
+	
+	1. cisdb/PromoterInfo.tbl and cisdb/PromoterSeq.tbl goes to table
+	at_tfdb.prom_seq.  PromoterInfo.tbl has an additional source field.
+	Promoter_Id => prom_acc.
+	NOTE:
+	  set the organism='Arabidopsis thaliana'
+	
+	2. cisdb/BindingSite.tbl goes to at_tfdb.binding_site and at_tfdb.matrix
+	Promoter_Id is prom_acc of at_tfdb.prom_seq, but link it to serial id
+	of at_tfdb.prom_seq.
+	BS_Name => mt_id of at_tfdb.matrix. mt_id of at_tfdb.binding_site is a
+	  link to that.
+	BS_Family => family_id of at_tfdb.matrix, not a link to at_tfdb.family
+	  because some family_id in cisdb/BindingSite.tbl don't appear in tfdb/families_id.tbl.
+	NOTE:
+		'NA' means NULL. But two 'none's for BS_family are also NULL
+			(BS_158147 and BS_158148).
+		763471/763508(all) have 'NA' on family ID.
+		Same BS_Name could have 2 kinds of family_id, one is NA, one is not. Filter the former.
+	
+	3. tfdb/families_id.tbl goes to table at_tfdb.family.
+	FamilyID => family_id. Description => description.
+	'Not Available' means NULL.
+	
+	4. tfdb/families_data.tbl goes table at_tfdb.factor.
+	FamilyID => families(group FamilyIDs from same LocusName together).
+	LocusName => tf_acc + tf_id. GeneName => tf_syn. Description => comment.
+	NOTE:
+	'NA' means NULL.
+	  1 entry's LocusName is null, deleted
+		(C3H     NA      MARD1   zinc finger protein with proline rich domain    NA).
+	  5 LocusNames have 2 entries. 4/5 correspond to same FamilyID,
+		just merge them (AT5G06490, At5g48250, At2g37630,At1g66350) by
+		checking NCBI Gene DB. 1/5 have 2 FamilyID. Keep them all.
+	  Some FamilyIDs don't match the case of the same FamilyID in
+		tfdb/families_id.tbl. i.e. C2C2-Gata/C2C2-GATA and Myb/MYB.
+		So need to map them to the same case as in tfdb/families_id.tbl.
+	  set the organism='Arabidopsis thaliana'
+		
+	5. tfdb/families_seq.tbl and tfdb/families_pep.tbl inserts into table at_tfdb/factor(contains only matched) and at_tfdb/factor_seq(contains all).
+	LocusName => tf_acc + tf_id. Sequence => sequence.
+	NOTE:
+		Remove 4 repetitive entries.
+		LocusName has case problem with tfdb/families_data.tbl.
+		Some sequences in tfdb/families_seq.tbl are not matched in
+		tfdb/families_data.tbl. And some entries in
+		tfdb/families_data.tbl are not matched in tfdb/families_seq.tbl.
+
+	6. tfdb/families_ref.tbl goes to table at_tfdb.family_ref.
+	FamilyID => family_id. Reference => ref_title. Author => ref_authors.
+	Link => ref_external_link. NOTE: the first two lines have some blank
+	trailing fields. 'Not Available' means NULL.
+
+	7. fake the matrix_similarity_score for binding_site2gene_id2mt_no.py
+		UPDATE binding_site SET matrix_similarity_score =0.9 ;
+		0.9 is arbitrary, but not 1.0. because 1.0 is used to judge
+		perfect matrices, which will be discarded.
+
+11-12-05
+genomedb.xmi
+genomedb.sql
+chromosome_fasta2db.py
+GeneASNXML2gene_mapping.py
+(11-13-05 check http://hto-pc44.usc.edu/research/annot/genomedb/)
+
+2. bin/
+
+match: TRANSFAC's program
+(2006-08-10)
+	shell/batch_match.py is used to wrap "match".
+
+3. data/
+
+contains all data from TRANSFAC cgi-bin's data/ directory.
+
+sub-directory match_data/ contains data/ from match.

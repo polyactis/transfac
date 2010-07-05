@@ -1,0 +1,405 @@
+ID V$E47_01
+MX localhost/matrices/matrixlib/V$E47_01
+MC 0.9
+CC 0.75
+//
+ID V$SP1_01
+MX localhost/matrices/matrixlib/V$SP1_01
+MC 0.8
+CC 0.75
+//
+ID V$CREB_01
+MX localhost/matrices/matrixlib/V$CREB_01
+MC 0.87
+CC 0.75
+//
+ID V$TAL1BETAE47_01
+MX localhost/matrices/matrixlib/V$TAL1BETAE47_01
+MC 0.9
+CC 0.75
+//
+ID V$TAL1ALPHAE47_01
+MX localhost/matrices/matrixlib/V$TAL1ALPHAE47_01
+MC 0.89
+CC 0.75
+//
+ID V$E47_02
+MX localhost/matrices/matrixlib/V$E47_02
+MC 0.88
+CC 0.75
+//
+ID V$PAX6_01
+MX localhost/matrices/matrixlib/V$PAX6_01
+MC 0.54
+CC 0.75
+//
+ID V$CREB_02
+MX localhost/matrices/matrixlib/V$CREB_02
+MC 0.84
+CC 0.75
+//
+ID V$TAXCREB_01
+MX localhost/matrices/matrixlib/V$TAXCREB_01
+MC 0.86
+CC 0.75
+//
+ID V$TAXCREB_02
+MX localhost/matrices/matrixlib/V$TAXCREB_02
+MC 0.87
+CC 0.75
+//
+ID V$USF_01
+MX localhost/matrices/matrixlib/V$USF_01
+MC 0.85
+CC 0.75
+//
+ID V$USF_02
+MX localhost/matrices/matrixlib/V$USF_02
+MC 0.56
+CC 0.75
+//
+ID V$HNF3B_01
+MX localhost/matrices/matrixlib/V$HNF3B_01
+MC 0.83
+CC 0.75
+//
+ID V$HNF1_01
+MX localhost/matrices/matrixlib/V$HNF1_01
+MC 0.77
+CC 0.75
+//
+ID V$ARP1_01
+MX localhost/matrices/matrixlib/V$ARP1_01
+MC 0.77
+CC 0.75
+//
+ID V$COUP_01
+MX localhost/matrices/matrixlib/V$COUP_01
+MC 0.8
+CC 0.75
+//
+ID V$CREB_Q2
+MX localhost/matrices/matrixlib/V$CREB_Q2
+MC 0.88
+CC 0.75
+//
+ID V$CREB_Q4
+MX localhost/matrices/matrixlib/V$CREB_Q4
+MC 0.92
+CC 0.75
+//
+ID V$NFY_Q6
+MX localhost/matrices/matrixlib/V$NFY_Q6
+MC 0.89
+CC 0.75
+//
+ID V$USF_Q6
+MX localhost/matrices/matrixlib/V$USF_Q6
+MC 0.85
+CC 0.75
+//
+ID V$SP1_Q6
+MX localhost/matrices/matrixlib/V$SP1_Q6
+MC 0.77
+CC 0.75
+//
+ID V$HNF1_C
+MX localhost/matrices/matrixlib/V$HNF1_C
+MC 0.63
+CC 0.75
+//
+ID V$NFY_C
+MX localhost/matrices/matrixlib/V$NFY_C
+MC 0.9
+CC 0.75
+//
+ID V$TATA_C
+MX localhost/matrices/matrixlib/V$TATA_C
+MC 0.88
+CC 0.75
+//
+ID V$USF_C
+MX localhost/matrices/matrixlib/V$USF_C
+MC 0.89
+CC 0.75
+//
+ID V$HAND1E47_01
+MX localhost/matrices/matrixlib/V$HAND1E47_01
+MC 0.81
+CC 0.75
+//
+ID V$STAT_01
+MX localhost/matrices/matrixlib/V$STAT_01
+MC 0.87
+CC 0.75
+//
+ID V$TATA_01
+MX localhost/matrices/matrixlib/V$TATA_01
+MC 0.72
+CC 0.75
+//
+ID V$NFY_01
+MX localhost/matrices/matrixlib/V$NFY_01
+MC 0.94
+CC 0.75
+//
+ID V$NFAT_Q6
+MX localhost/matrices/matrixlib/V$NFAT_Q6
+MC 0.85
+CC 0.75
+//
+ID V$PAX4_01
+MX localhost/matrices/matrixlib/V$PAX4_01
+MC 0.59
+CC 0.75
+//
+ID V$PAX4_02
+MX localhost/matrices/matrixlib/V$PAX4_02
+MC 0.66
+CC 0.75
+//
+ID V$PAX4_03
+MX localhost/matrices/matrixlib/V$PAX4_03
+MC 0.72
+CC 0.75
+//
+ID V$PAX4_04
+MX localhost/matrices/matrixlib/V$PAX4_04
+MC 0.44
+CC 0.75
+//
+ID V$NKX61_01
+MX localhost/matrices/matrixlib/V$NKX61_01
+MC 0.85
+CC 0.75
+//
+ID V$IPF1_Q4
+MX localhost/matrices/matrixlib/V$IPF1_Q4
+MC 0.85
+CC 0.75
+//
+ID V$STAT5A_01
+MX localhost/matrices/matrixlib/V$STAT5A_01
+MC 0.93
+CC 0.75
+//
+ID V$STAT5B_01
+MX localhost/matrices/matrixlib/V$STAT5B_01
+MC 0.94
+CC 0.75
+//
+ID V$STAT5A_02
+MX localhost/matrices/matrixlib/V$STAT5A_02
+MC 0.74
+CC 0.75
+//
+ID V$TBP_01
+MX localhost/matrices/matrixlib/V$TBP_01
+MC 0.86
+CC 0.75
+//
+ID V$NKX22_01
+MX localhost/matrices/matrixlib/V$NKX22_01
+MC 0.87
+CC 0.75
+//
+ID V$STAT5A_04
+MX localhost/matrices/matrixlib/V$STAT5A_04
+MC 0.96
+CC 0.75
+//
+ID V$HNF6_Q6
+MX localhost/matrices/matrixlib/V$HNF6_Q6
+MC 0.9
+CC 0.75
+//
+ID V$MAZ_Q6
+MX localhost/matrices/matrixlib/V$MAZ_Q6
+MC 0.84
+CC 0.75
+//
+ID V$ALPHACP1_01
+MX localhost/matrices/matrixlib/V$ALPHACP1_01
+MC 0.88
+CC 0.75
+//
+ID V$E12_Q6
+MX localhost/matrices/matrixlib/V$E12_Q6
+MC 0.93
+CC 0.75
+//
+ID V$HEB_Q6
+MX localhost/matrices/matrixlib/V$HEB_Q6
+MC 0.84
+CC 0.75
+//
+ID V$HNF3ALPHA_Q6
+MX localhost/matrices/matrixlib/V$HNF3ALPHA_Q6
+MC 0.8
+CC 0.75
+//
+ID V$USF2_Q6
+MX localhost/matrices/matrixlib/V$USF2_Q6
+MC 0.96
+CC 0.75
+//
+ID V$CDX2_Q5
+MX localhost/matrices/matrixlib/V$CDX2_Q5
+MC 0.59
+CC 0.75
+//
+ID V$HMGIY_Q6
+MX localhost/matrices/matrixlib/V$HMGIY_Q6
+MC 0.82
+CC 0.75
+//
+ID V$DR1_Q3
+MX localhost/matrices/matrixlib/V$DR1_Q3
+MC 0.46
+CC 0.75
+//
+ID V$PPAR_DR1_Q2
+MX localhost/matrices/matrixlib/V$PPAR_DR1_Q2
+MC 0.51
+CC 0.75
+//
+ID V$COUP_DR1_Q6
+MX localhost/matrices/matrixlib/V$COUP_DR1_Q6
+MC 0.86
+CC 0.75
+//
+ID V$NFY_Q6_01
+MX localhost/matrices/matrixlib/V$NFY_Q6_01
+MC 0.84
+CC 0.75
+//
+ID V$STAT_Q6
+MX localhost/matrices/matrixlib/V$STAT_Q6
+MC 0.85
+CC 0.75
+//
+ID V$HNF1_Q6
+MX localhost/matrices/matrixlib/V$HNF1_Q6
+MC 0.7
+CC 0.75
+//
+ID V$HNF3_Q6
+MX localhost/matrices/matrixlib/V$HNF3_Q6
+MC 0.76
+CC 0.75
+//
+ID V$USF_Q6_01
+MX localhost/matrices/matrixlib/V$USF_Q6_01
+MC 0.56
+CC 0.75
+//
+ID V$CREB_Q3
+MX localhost/matrices/matrixlib/V$CREB_Q3
+MC 0.82
+CC 0.75
+//
+ID V$E2A_Q2
+MX localhost/matrices/matrixlib/V$E2A_Q2
+MC 0.85
+CC 0.75
+//
+ID V$PAX_Q6
+MX localhost/matrices/matrixlib/V$PAX_Q6
+MC 0.54
+CC 0.75
+//
+ID V$CREB_Q2_01
+MX localhost/matrices/matrixlib/V$CREB_Q2_01
+MC 0.86
+CC 0.75
+//
+ID V$CREB_Q4_01
+MX localhost/matrices/matrixlib/V$CREB_Q4_01
+MC 0.86
+CC 0.75
+//
+ID V$MYOD_Q6_01
+MX localhost/matrices/matrixlib/V$MYOD_Q6_01
+MC 0.85
+CC 0.75
+//
+ID V$SP1_Q6_01
+MX localhost/matrices/matrixlib/V$SP1_Q6_01
+MC 0.79
+CC 0.75
+//
+ID V$SP1_Q4_01
+MX localhost/matrices/matrixlib/V$SP1_Q4_01
+MC 0.79
+CC 0.75
+//
+ID V$SP1_Q2_01
+MX localhost/matrices/matrixlib/V$SP1_Q2_01
+MC 0.8
+CC 0.75
+//
+ID V$NFAT_Q4_01
+MX localhost/matrices/matrixlib/V$NFAT_Q4_01
+MC 0.83
+CC 0.75
+//
+ID V$DR4_Q2
+MX localhost/matrices/matrixlib/V$DR4_Q2
+MC 0.53
+CC 0.75
+//
+ID V$E2A_Q6
+MX localhost/matrices/matrixlib/V$E2A_Q6
+MC 0.96
+CC 0.75
+//
+ID V$PAX6_Q2
+MX localhost/matrices/matrixlib/V$PAX6_Q2
+MC 0.8
+CC 0.75
+//
+ID V$TBP_Q6
+MX localhost/matrices/matrixlib/V$TBP_Q6
+MC 0.8
+CC 0.75
+//
+ID V$CREBATF_Q6
+MX localhost/matrices/matrixlib/V$CREBATF_Q6
+MC 0.88
+CC 0.75
+//
+ID V$CDX_Q5
+MX localhost/matrices/matrixlib/V$CDX_Q5
+MC 0.43
+CC 0.75
+//
+ID V$HMGIY_Q3
+MX localhost/matrices/matrixlib/V$HMGIY_Q3
+MC 0.67
+CC 0.75
+//
+ID V$HNF1_Q6_01
+MX localhost/matrices/matrixlib/V$HNF1_Q6_01
+MC 0.56
+CC 0.75
+//
+ID V$HNF3_Q6_01
+MX localhost/matrices/matrixlib/V$HNF3_Q6_01
+MC 0.81
+CC 0.75
+//
+ID V$IPF1_Q4_01
+MX localhost/matrices/matrixlib/V$IPF1_Q4_01
+MC 0.81
+CC 0.75
+//
+ID V$EBOX_Q6_01
+MX localhost/matrices/matrixlib/V$EBOX_Q6_01
+MC 0.81
+CC 0.75
+//
+ID V$COUPTF_Q6
+MX localhost/matrices/matrixlib/V$COUPTF_Q6
+MC 0.63
+CC 0.75
+//
