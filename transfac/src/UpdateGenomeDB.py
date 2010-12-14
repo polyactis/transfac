@@ -59,9 +59,13 @@ class UpdateGenomeDB(object):
 		file_list = []
 		for file_source in file_source_ls:
 			filename = os.path.basename(file_source)
-			cmd_p = subprocess.Popen([command, '-P', tmp_dir, file_source], stderr=sys.stderr, stdout=sys.stdout)
-			cmd_p.wait()
-			file_list.append(os.path.join(tmp_dir, filename))
+			local_filename = os.path.join(tmp_dir, filename)
+			if os.path.isfile(local_filename):
+				sys.stderr("%s exists. Skip.\n"%local_filename)
+			else:
+				cmd_p = subprocess.Popen([command, '-P', tmp_dir, file_source], stderr=sys.stderr, stdout=sys.stdout)
+				cmd_p.wait()
+			file_list.append(local_filename)
 		sys.stderr.write("Done.\n")
 		return file_list
 	
@@ -70,7 +74,7 @@ class UpdateGenomeDB(object):
 		for filename in file_list:
 			cf2db_ins = chromosome_fasta2db(drivername=self.drivername, hostname=self.hostname, dbname=self.dbname, schema=self.schema, \
 										db_user=self.db_user, db_passwd=self.db_passwd, inputfiles=[filename], \
-										organism=self.organism, commit=self.commit, report=self.report)
+										organism=self.organism, commit=self.commit, report=self.report, debug=self.debug)
 			cf2db_ins.run()
 
 if __name__ == '__main__':
