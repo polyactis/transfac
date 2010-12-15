@@ -16,17 +16,19 @@ Description:
 		ftp://ftp.ncbi.nih.gov/refseq/release/
 	INPUT_FILEs are *.fa.gz (fasta format). The program detects whether it's gzipped or not
 		based on the filename (like *gz or not). It could contain multiple fasta blocks.
-		Taxonomy ID of the organism is detected thru the fasta header by FigureOutTaxID.
+		Taxonomy ID of the organism is detected thru the fasta header by FigureOutTaxID
+			based on data stored in tables of schema taxonomy in the same postgres db, on the same host.
 	
 	Results are stored in 2 tables in the database, annot_assembly and raw_sequence.
-	The chromosome sequence is snipped into 10kb chunks and dumped into raw_sequence_table.
+		The chromosome sequence is snipped into 10kb chunks and dumped into raw_sequence_table.
+		If annot_assembly has the same entry based on the unique constraint, this entry would be ignored. 
 	
 """
 
 import sys, getopt, os, re, gzip
 sys.path += [os.path.join(os.path.expanduser('~/script'))]
 from annot.bin.codense.common import db_connect, org_short2long, org2tax_id
-from GenomeDB import GenomeDatabase, SequenceType, RawSequence, AnnotAssembly
+from pymodule.GenomeDB import *
 from pymodule import PassingData
 from pymodule.utils import FigureOutTaxID
 #from pymodule.db import db_connect
@@ -85,23 +87,6 @@ class chromosome_fasta2db:
 		self.p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')	#the last ? means [,\n\r] is optional
 		self.p_acc_ver = re.compile(r'(\w+)\.(\d+)')
 	
-	def submit_annot_assembly(self, curs, annot_assembly_table, aa_attr_instance):
-		"""
-		2008-07-27
-			deprecated
-		"""
-		sys.stderr.write("\tSubmitting annot_assembly...")
-		curs.execute("insert into %s(gi, acc_ver, acc, version, tax_id, \
-			chromosome, start, stop, raw_sequence_start_id, seq_type, \
-			comment) values(%s, '%s', '%s', %s, %s, \
-			'%s', %s, %s, %s, %s,\
-			'%s')"%(annot_assembly_table,\
-			aa_attr_instance.gi, aa_attr_instance.acc_ver, aa_attr_instance.acc, aa_attr_instance.version, aa_attr_instance.tax_id,\
-			aa_attr_instance.chromosome, aa_attr_instance.start, aa_attr_instance.stop, aa_attr_instance.raw_sequence_start_id, aa_attr_instance.seq_type,\
-			aa_attr_instance.comment))
-		sys.stderr.write("Done.\n")
-	
-	
 	def get_current_max_raw_sequence_id(self, curs, raw_sequence_table):
 		"""
 		2008-07-27
@@ -123,7 +108,7 @@ class chromosome_fasta2db:
 		"""
 		passingdata.current_stop = passingdata.current_start+len(seq_to_db)-1
 		raw_sequence = RawSequence(annot_assembly_gi=aa_attr_instance.gi, start=passingdata.current_start, stop=passingdata.current_stop, sequence=seq_to_db)
-		session.save(raw_sequence)
+		session.add(raw_sequence)
 		if not passingdata.raw_sequence_initiated:
 			passingdata.raw_sequence_initiated = True
 			aa_attr_instance.raw_sequence_start = raw_sequence
@@ -131,6 +116,8 @@ class chromosome_fasta2db:
 		
 	def parse_chromosome_fasta_file(self, session, filename, gzipped, tax_id=None, chunk_size=10000):
 		"""
+		2010-12-15
+			if entry already exists in AnnotAssembly, skip it.
 		2008-07-29
 			figure out tax_id via FigureOutTaxID
 			filename could contain multiple fasta blocks
@@ -147,7 +134,8 @@ class chromosome_fasta2db:
 		line = inf.readline()
 		new_fasta_block = 1	#'line' is not enough to stop the 'while' loop. after the file reading is exhausted by "for line in inf:", 'line' still contains the stuff from the last line.
 		no_of_fasta_blocks = 0
-		FigureOutTaxID_ins = FigureOutTaxID()
+		FigureOutTaxID_ins = FigureOutTaxID(db_user=self.db_user,
+						db_passwd=self.db_passwd, hostname=self.hostname, dbname=self.dbname)
 		while line and new_fasta_block:
 			new_fasta_block = 0	#set it to 0, assuming only one fasta block, change upon new fasta block
 			if line[0]!='>':	#not fasta block header
@@ -169,33 +157,46 @@ class chromosome_fasta2db:
 				line = inf.readline()
 				new_fasta_block = 1
 				continue
-			gi = int(header[1])
-			if AnnotAssembly.query.get(gi):	#already has it
-				sys.stderr.write("gi=%s (%s) already in database. Ignore.\n"%(gi, header))
+			
+			
+			
+			
+			if self.p_chromosome.search(header[4]) is not None:
+				chromosome = self.p_chromosome.search(header[4]).groups()[0]
+			elif header[4].find('mitochondrion')!=-1:
+				chromosome = 'mitochondrion'
+			elif header[4].find('chloroplast')!=-1:
+				chromosome = 'chloroplast'
+			else:	#something else, take the whole before ','
+				chromosome = header[4].split(',')[0]
+			sequence_type = SequenceType.query.filter_by(type='chromosome sequence').first()
+			start = 1
+			aa_attr_instance = AnnotAssembly.query.filter_by(chromosome=chromosome).filter_by(tax_id=tax_id).filter_by(start=start).\
+				filter_by(sequence_type_id=sequence_type.id).first()
+			if aa_attr_instance and aa_attr_instance.raw_sequence_start_id is not None:
+				# if raw sequences have been associated with this AnnotAssembly and 
+				sys.stderr.write("raw sequences have been associated with this AnnotAssembly (tax_id %s, chr=%s, start=%s). Ignore.\n"%\
+								(tax_id, chromosome, start))
 				line = inf.readline()
 				new_fasta_block = 1
 				continue
-			aa_attr_instance = AnnotAssembly()			
-			aa_attr_instance.gi = gi
-			aa_attr_instance.acc_ver = header[3]
-			aa_attr_instance.accession, aa_attr_instance.version = self.p_acc_ver.search(header[3]).groups()
-			aa_attr_instance.version = int(aa_attr_instance.version)
-			aa_attr_instance.tax_id = _tax_id				
-			if self.debug:
-				sys.stderr.write("tax_id=%s for %s.\n"%(aa_attr_instance.tax_id, header[4]))
-			#aa_attr_instance.chromosome = self.p_chromosome.search(filename).groups()[0]
-			if self.p_chromosome.search(header[4]) is not None:
-				aa_attr_instance.chromosome = self.p_chromosome.search(header[4]).groups()[0]
-			elif header[4].find('mitochondrion')!=-1:
-				aa_attr_instance.chromosome = 'mitochondrion'
-			elif header[4].find('chloroplast')!=-1:
-				aa_attr_instance.chromosome = 'chloroplast'
-			else:	#something else, take the whole before ','
-				aa_attr_instance.chromosome = header[4].split(',')[0]
-			aa_attr_instance.start = 1
-			#aa_attr_instance.raw_sequence_start_id = self.get_current_max_raw_sequence_id(curs, raw_sequence_table)+1
-			aa_attr_instance.sequence_type = SequenceType.query.filter_by(type='chromosome sequence').first()
-			aa_attr_instance.comment = header[4]	#store this whole thing for future reference
+			if aa_attr_instance is None:
+				gi = int(header[1])
+				aa_attr_instance = AnnotAssembly()
+				aa_attr_instance.gi = gi
+				aa_attr_instance.acc_ver = header[3]
+				aa_attr_instance.accession, aa_attr_instance.version = self.p_acc_ver.search(header[3]).groups()
+				aa_attr_instance.version = int(aa_attr_instance.version)
+				aa_attr_instance.tax_id = _tax_id
+				if self.debug:
+					sys.stderr.write("tax_id=%s for %s.\n"%(aa_attr_instance.tax_id, header[4]))
+				
+				
+				aa_attr_instance.chromosome = chromosome
+				aa_attr_instance.start = 1
+				#aa_attr_instance.raw_sequence_start_id = self.get_current_max_raw_sequence_id(curs, raw_sequence_table)+1
+				aa_attr_instance.sequence_type_id = sequence_type.id
+				aa_attr_instance.comment = header[4]	#store this whole thing for future reference
 			passingdata = PassingData()
 			passingdata.current_start = 1
 			passingdata.raw_sequence_initiated = False
@@ -211,27 +212,20 @@ class chromosome_fasta2db:
 				seq += line[:-1]
 				if len(seq)>=chunk_size:
 					seq_to_db = seq[:chunk_size]
-					seq = seq[chunk_size:]
 					self.saveRawSequence(session, seq_to_db, passingdata, aa_attr_instance)
+					seq = seq[chunk_size:]	#remove the one already in db
 					if self.report:
 						sys.stderr.write("%s\t%s\t%s"%('\x08'*20, no_of_fasta_blocks, passingdata.current_start/chunk_size+1))
 			if seq:	# last segment from last line
 				self.saveRawSequence(session, seq, passingdata, aa_attr_instance)
 			aa_attr_instance.stop = passingdata.current_stop
-			session.save_or_update(aa_attr_instance)
+			session.add(aa_attr_instance)
 			session.flush()
 			no_of_fasta_blocks += 1
 		if self.report:
 			sys.stderr.write("Number of fasta blocks: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
-	def submit_raw_sequence(self, curs, raw_sequence_table, acc_ver, start, stop, sequence):
-		"""
-		2008-07-27
-			deprecated
-		"""
-		curs.execute("insert into %s(acc_ver, start, stop, sequence) values('%s', %s, %s, '%s')"%\
-			(raw_sequence_table, acc_ver, start, stop, sequence))
 	
 	def run(self):
 		"""
@@ -240,9 +234,14 @@ class chromosome_fasta2db:
 			--GenomeDatabase
 			--parse_chromosome_fasta_file()
 		"""
+		if self.debug:
+			import pdb
+			pdb.set_trace()
+		
 		sys.stderr.write("\tTotally, %d files to be processed.\n"%len(self.inputfiles))
 		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
-				   password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+						password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+		db.setup(create_tables=False)
 		session = db.session
 		session.begin()
 		for f in self.inputfiles:
