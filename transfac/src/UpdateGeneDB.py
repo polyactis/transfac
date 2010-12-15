@@ -4,6 +4,9 @@ Examples:
 	#populate gene database in postgresql
 	UpdateGeneDB.py -u crocea -c
 	
+	# 2010-12-14 add gene info into schema vervetdb.genome. files stored in /usr/local/research_data/NCBI/
+	UpdateGeneDB.py -d vervetdb -k genome -u yh -c -v postgresql -t /usr/local/research_data/NCBI/
+	
 	#populate gene database in mysql
 	UpdateGeneDB.py -v mysql -u yh -z papaya -d genome -k "" -c
 	
@@ -23,7 +26,7 @@ else:   #32bit
 import time, csv, getopt, gzip
 import warnings, traceback, gc, subprocess
 from UpdateGenomeDB import UpdateGenomeDB
-from GenomeDB import GenomeDatabase, Gene, Gene2go
+from pymodule.GenomeDB import GenomeDatabase, Gene, Gene2go
 
 class UpdateGeneDB(UpdateGenomeDB):
 	__doc__ = __doc__
@@ -63,50 +66,64 @@ class UpdateGeneDB(UpdateGenomeDB):
 		reader = csv.reader(inf, delimiter='\t')
 		reader.next()	#skip the header
 		counter = 0
+		real_counter = 0
 		for row in reader:
 			for i in range(len(row)):
 				if row[i]=='-':
 					row[i] = None
 			counter += 1
 			if input_fname_type==1:
-				tax_id, gene_id, gene_symbol, locustag, synonyms, dbxrefs, chromosome, map_location, description, \
+				tax_id, ncbi_gene_id, gene_symbol, locustag, synonyms, dbxrefs, chromosome, map_location, description, \
 				type_of_gene, symbol_from_nomenclature_authority, full_name_from_nomenclature_authority, nomenclature_status,\
 				other_designations, modification_date = row
 				
-				gene = Gene(tax_id=tax_id, gene_id=gene_id, gene_symbol=gene_symbol, locustag=locustag, \
+				gene = Gene(tax_id=tax_id, ncbi_gene_id=ncbi_gene_id, gene_symbol=gene_symbol, locustag=locustag, \
 						synonyms=synonyms, dbxrefs=dbxrefs, chromosome=chromosome, map_location=map_location, \
 						description=description, \
 						type_of_gene=type_of_gene, symbol_from_nomenclature_authority=symbol_from_nomenclature_authority, \
 						full_name_from_nomenclature_authority=full_name_from_nomenclature_authority, nomenclature_status=nomenclature_status,\
 						other_designations=other_designations, modification_date=modification_date)
-				session.save(gene)
+				session.add(gene)
+				real_counter += 1
 			elif input_fname_type==2:
-				tax_id, gene_id, go_id, evidence, go_qualifier, go_description, pubmed_ids, category = row[:8]
-				gene2go = Gene2go(tax_id=tax_id, gene_id=gene_id, go_id=go_id, evidence=evidence, go_qualifier=go_qualifier, \
+				tax_id, ncbi_gene_id, go_id, evidence, go_qualifier, go_description, pubmed_ids, category = row[:8]
+				gene = Gene.query.filter_by(ncbi_gene_id=ncbi_gene_id).first()
+				if gene is not None:
+					gene2go = Gene2go(tax_id=tax_id, go_id=go_id, evidence=evidence, go_qualifier=go_qualifier, \
 								go_description=go_description, pubmed_ids=pubmed_ids, category=category)
-				session.save(gene2go)
+					gene2go.gene = gene
+					session.add(gene2go)
+					real_counter += 1
 			if counter%5000==0:
 				session.flush()
-				session.clear()
-				sys.stderr.write("%s\t%s"%('\x08'*40, counter))
+				#session.clear()	#2010-12-14 gone in 0.6
+				session.expunge_all()	# 2010-12-14 sqlalchemy 0.6
+				sys.stderr.write("%s\t%s\t%s(skipped)"%('\x08'*40, counter, counter-real_counter))
 		del reader, inf
 		sys.stderr.write("Done.\n")
 	
 	def run(self):
+		"""
+		2010-12-14
+			add "db.setup(create_tables=False)" to setup db structure
+		"""
+		
 		if self.debug:
 			import pdb
 			pdb.set_trace()
 		
 		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
-				   password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+				password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+		db.setup(create_tables=False)
 		session = db.session
-		session.begin()
+		#session.begin()
 		gene_info_fname, gene2go_fname = self.getInputFileList([self.gene_info_ftp_url, self.gene2go_ftp_url], self.tmp_dir)
 		#gene_info_fname = '/usr/local/research_data/ncbi/gene_2008_07_06/DATA/gene_info.gz'
 		self.submitGeneInfo(gene_info_fname, session)
 		#gene2go_fname = '/usr/local/research_data/ncbi/gene_2008_07_06/DATA/gene2go.gz'
 		self.submitGeneInfo(gene2go_fname, session, input_fname_type=2)
 		if self.commit:
+			session.flush()
 			session.commit()
 			#db.transaction.commit()
 		else:	#default is also rollback(). to demonstrate good programming
