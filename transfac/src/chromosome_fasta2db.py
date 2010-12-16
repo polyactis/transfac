@@ -117,6 +117,9 @@ class chromosome_fasta2db:
 	def parse_chromosome_fasta_file(self, session, filename, gzipped, tax_id=None, chunk_size=10000):
 		"""
 		2010-12-15
+			fix a bug that _tax_id shall be used in query AnnotAssembly.
+			This bug caused the db redundancy check to fail.
+		2010-12-15
 			if entry already exists in AnnotAssembly, skip it.
 		2008-07-29
 			figure out tax_id via FigureOutTaxID
@@ -158,9 +161,6 @@ class chromosome_fasta2db:
 				new_fasta_block = 1
 				continue
 			
-			
-			
-			
 			if self.p_chromosome.search(header[4]) is not None:
 				chromosome = self.p_chromosome.search(header[4]).groups()[0]
 			elif header[4].find('mitochondrion')!=-1:
@@ -171,12 +171,12 @@ class chromosome_fasta2db:
 				chromosome = header[4].split(',')[0]
 			sequence_type = SequenceType.query.filter_by(type='chromosome sequence').first()
 			start = 1
-			aa_attr_instance = AnnotAssembly.query.filter_by(chromosome=chromosome).filter_by(tax_id=tax_id).filter_by(start=start).\
+			aa_attr_instance = AnnotAssembly.query.filter_by(chromosome=chromosome).filter_by(tax_id=_tax_id).filter_by(start=start).\
 				filter_by(sequence_type_id=sequence_type.id).first()
 			if aa_attr_instance and aa_attr_instance.raw_sequence_start_id is not None:
 				# if raw sequences have been associated with this AnnotAssembly and 
 				sys.stderr.write("raw sequences have been associated with this AnnotAssembly (tax_id %s, chr=%s, start=%s). Ignore.\n"%\
-								(tax_id, chromosome, start))
+								(_tax_id, chromosome, start))
 				line = inf.readline()
 				new_fasta_block = 1
 				continue
