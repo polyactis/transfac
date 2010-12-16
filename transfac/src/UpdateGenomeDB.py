@@ -93,6 +93,9 @@ class UpdateGenomeDB(object):
 		for chr in range(1,23)+['X', 'Y','MT']:
 			self.short_org2chr_file_ls[speciesID].\
 				append('ftp://ftp.ncbi.nih.gov/refseq/H_sapiens/H_sapiens/Assembled_chromosomes/seq/hs_ref_GRCh37.p2_chr%s.fa.gz'%chr)
+			# 2010-12-15 the celera version is not needed
+			#self.short_org2chr_file_ls[speciesID].\
+			#	append('ftp://ftp.ncbi.nih.gov/refseq/H_sapiens/H_sapiens/Assembled_chromosomes/seq/hs_alt_Hs_Celera_chr%s.fa.gz'%chr)
 		
 		speciesID = 'mm'
 		#2010-12-14 URl for the rhesus macaque genome sequences
@@ -106,9 +109,12 @@ class UpdateGenomeDB(object):
 		speciesID = 'ptr'
 		#2010-12-14 URl for the rhesus macaque genome sequences
 		self.short_org2chr_file_ls[speciesID] = []
-		for chr in range(1,23)+['X','Y', '2A', '2B']:
+		for chr in [1]+range(3,23)+['X','Y', '2A', '2B']:	#chimp doesn't have chr 2.
 			self.short_org2chr_file_ls[speciesID].\
 				append('ftp://ftp.ncbi.nlm.nih.gov/genomes/Pan_troglodytes/Assembled_chromosomes/ptr_ref_chr%s.fa.gz'%chr)
+		# 2010-12-15 an alternative chimp Y chromosome assembly (cause confusing in terms of gene coordinates.)
+		#self.short_org2chr_file_ls[speciesID].\
+		#		append('ftp://ftp.ncbi.nlm.nih.gov/genomes/Pan_troglodytes/Assembled_chromosomes/ptr_alt_CCYSCv1_chrY.fa.gz')
 		
 		file_list = self.getInputFileList(self.short_org2chr_file_ls[self.organism], self.tmp_dir)
 		for filename in file_list:
