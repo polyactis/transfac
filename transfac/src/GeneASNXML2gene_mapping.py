@@ -1,26 +1,18 @@
 #!/usr/bin/env python
 """
-Usage: GeneASNXML2gene_mapping.py [OPTIONS] INPUT_FILE1 INPUT_FILE2 ...
-
-Option:
-	-z ..., --hostname=...	the hostname, zhoudb(default)
-	-d ..., --dbname=...	the database name, graphdb(default)
-	-k ..., --schema=...	which schema in the database, sequence(default)
-	-t ...,	gene_mapping  table, 'entrezgene_mapping'(default)
-	-a ...,	annot assembly  table, 'annot_assembly'(default)
-	-c,	commit this database transaction
-	-b,	enable debug
-	-r,	enable report
 
 Examples:
 	#postgresql
 	GeneASNXML2gene_mapping.py -c -i *.xgs
 	
 	#package cElementTree is only installed in python 2.4
-	python2.4 ./GeneASNXML2gene_mapping.py -z localhost -k genome -c -i /usr/local/research_data/ncbi/gene_2008_07_06/at.xgs
+	python2.4 ./GeneASNXML2gene_mapping.py -z localhost -k genome -c -i /usr/local/research_data/ncbi/gene_2008_07_06/at.xgs -r
+
+	# 2010-12-15
+	GeneASNXML2gene_mapping.py -z localhost -k genome -d vervetdb  -i Pan_troglodytes.xgs -r -u yh -c
 
 	#mysql 
-	python2.4 GeneASNXML2gene_mapping.py -v mysql -u yh -z papaya -d genome -k "" -c -i at.xgs
+	python2.4 GeneASNXML2gene_mapping.py -v mysql -u yh -z papaya -d genome -k "" -c -i at.xgs -r
 
 Description:
 	Program to parse the output of gene2xml and get location information
@@ -34,11 +26,12 @@ Description:
 import sys, getopt, os
 sys.path += [os.path.join(os.path.expanduser('~/script/annot/bin'))]
 from codense.common import db_connect
-import cElementTree as ElementTree
-from GenomeDB import GenomeDatabase, Gene, EntrezgeneMapping, SequenceType, EntrezgeneType, \
+import xml.etree.cElementTree as ElementTree
+from GenomeDB import GenomeDatabase, Gene, SequenceType, EntrezgeneType, \
 	GeneSegment, GeneCommentaryType, GeneCommentary, AnnotAssembly
 from datetime import datetime
 from pymodule import PassingData
+from pymodule.utils import returnAnyValueIfNothing
 import traceback
 
 class entrezgene_mapping_attr:
@@ -66,7 +59,7 @@ class entrezgene_mapping_attr:
 
 class GeneASNXML2gene_mapping:
 	__doc__ = __doc__
-	option_default_dict = {('drivername', 1,):['postgres', 'v', 1, 'which type of database? mysql or postgres', ],\
+	option_default_dict = {('drivername', 1,):['postgresql', 'v', 1, 'which type of database? mysql or postgresql', ],\
 							('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
 							('dbname', 1, ): ['graphdb', 'd', 1, 'database name', ],\
 							('schema', 1, ): ['genome', 'k', 1, 'database schema name', ],\
@@ -256,7 +249,7 @@ class GeneASNXML2gene_mapping:
 				sys.stderr.write("\t Gene-commentary_type=%s not in db yet.\n"%commentary_type_id)
 			commentary_type = elem.find('Gene-commentary_type').get('value')
 			gene_commentary_type = GeneCommentaryType(id=commentary_type_id, type=commentary_type)
-			session.save(gene_commentary_type)
+			session.add(gene_commentary_type)
 			session.flush()
 		
 		if self.debug:
@@ -270,7 +263,7 @@ class GeneASNXML2gene_mapping:
 		gene_commentary = GeneCommentary(label=label, accession=accession, version=version,\
 										text=text, gi=gi)
 		gene_commentary.gene_commentary_type_id = commentary_type_id
-		gene_commentary.gene_id = entrezgene_mapping.gene_id
+		gene_commentary.gene_id = entrezgene_mapping.id
 		#for the coordinates
 		genomic_coords_elem = elem.find('Gene-commentary_genomic-coords')
 		if genomic_coords_elem:
@@ -310,7 +303,7 @@ class GeneASNXML2gene_mapping:
 					sys.stderr.write("\t\t found gene_product commentary inside this gene_commentary.\n")
 				sub_gene_commentary = self.returnGeneCommentary(entrezgene_locus_products_elem, entrezgene_mapping, session)
 				#gene_product.gene_product = gene_commentary
-				#session.save(gene_product)
+				#session.add(gene_product)
 				#session.flush()
 				gene_commentary.gene_commentaries.append(sub_gene_commentary)
 		return gene_commentary
@@ -380,15 +373,17 @@ class GeneASNXML2gene_mapping:
 	
 	def return_datetime(self, date_elem):
 		"""
+		2010-12-15
+			use returnAnyValueIfNothing() to deal with nothing returned.
 		2008-07-28
 		"""
 		try:
-			year = int(date_elem.findtext('Date-std_year'))
-			month= int(date_elem.findtext('Date-std_month'))
-			day = int(date_elem.findtext('Date-std_day'))
-			hour = int(date_elem.findtext('Date-std_hour'))
-			minute = int(date_elem.findtext('Date-std_minute'))
-			second = int(date_elem.findtext('Date-std_second'))
+			year = returnAnyValueIfNothing(date_elem.findtext('Date-std_year'), int)
+			month= returnAnyValueIfNothing(date_elem.findtext('Date-std_month'), int)
+			day = returnAnyValueIfNothing(date_elem.findtext('Date-std_day'), int)
+			hour = returnAnyValueIfNothing(date_elem.findtext('Date-std_hour'))
+			minute = returnAnyValueIfNothing(date_elem.findtext('Date-std_minute'))
+			second = returnAnyValueIfNothing(date_elem.findtext('Date-std_second'))
 			return datetime(year, month, day, hour, minute, second)
 		except:
 			traceback.print_exc()
@@ -397,6 +392,8 @@ class GeneASNXML2gene_mapping:
 	
 	def parse_entrezgene_xml_file(self, session, filename):
 		"""
+		2010-12-14
+			EntrezgeneMapping has been superceded by Gene.
 		2008-07-28
 		11-13-05 all xxx_from or xxx_to are computer indices starting from 0, so all +1
 		"""
@@ -411,19 +408,24 @@ class GeneASNXML2gene_mapping:
 					if self.debug:
 						sys.stderr.write("gene_id=%s status: %s\n"%(gene_id, status))
 					#em_attr_instance = entrezgene_mapping_attr()
-					entrezgene_mapping = EntrezgeneMapping()
 					#em_attr_instance.gene_id = elem.findtext('Entrezgene_track-info/Gene-track/Gene-track_geneid')
-					entrezgene_mapping.gene_id = gene_id
+					entrezgene_mapping = Gene.query.filter_by(ncbi_gene_id=gene_id).first()
+					if entrezgene_mapping is None:
+						entrezgene_mapping = Gene(ncbi_gene_id=gene_id)
+						#sys.stderr.write("\t Warning: gene_id=%s not in table gene. EntrezgeneMapping entry skipped.\n"%(gi, gene_id))
+						#continue
 					entrezgene_mapping.date_created = self.return_datetime(elem.find('Entrezgene_track-info/Gene-track/Gene-track_create-date/Date/Date_std/Date-std'))
 					entrezgene_mapping.date_updated = self.return_datetime(elem.find('Entrezgene_track-info/Gene-track/Gene-track_update-date/Date/Date_std/Date-std'))
-					entrezgene_type_id = elem.findtext('Entrezgene_type')
+					
+					#2010-7-30 add 1000 to entrezgene_type_id because the original one could be 0 (unknown), not possible with id in mysql.
+					entrezgene_type_id = int(elem.findtext('Entrezgene_type'))+1000
 					entrezgene_type = EntrezgeneType.get(entrezgene_type_id)	#query the db to see if it exists or not
 					if not entrezgene_type:
 						entrezgene_type_value = elem.find('Entrezgene_type').get('value')
 						entrezgene_type = EntrezgeneType(id=entrezgene_type_id, type=entrezgene_type_value)
-						session.save(entrezgene_type)
+						session.add(entrezgene_type)
 						session.flush()
-					entrezgene_mapping.entrezgene_type_id = entrezgene_type_id
+					entrezgene_mapping.entrezgene_type = entrezgene_type	#2010-7-30 not directly assigning the ID.
 					
 					entrezgene_mapping.tax_id = \
 						elem.findtext('Entrezgene_source/BioSource/BioSource_org/Org-ref/Org-ref_db/Dbtag/Dbtag_tag/Object-id/Object-id_id')
@@ -475,7 +477,7 @@ class GeneASNXML2gene_mapping:
 										sys.stderr.write("\t entrezgene_mapping.strand=%s.\n"%entrezgene_mapping.strand)
 								entrezgene_mapping.start = int(seq_interval_elem.findtext('Seq-interval_from'))+1
 								entrezgene_mapping.stop = int(seq_interval_elem.findtext('Seq-interval_to'))+1
-								session.save_or_update(entrezgene_mapping)
+								session.add(entrezgene_mapping)
 								session.flush()
 								### 2nd check the products of the genomic region
 								entrezgene_locus_products_elems = el_sub_elem.find('Gene-commentary_products')
@@ -485,14 +487,14 @@ class GeneASNXML2gene_mapping:
 										if self.debug:
 											sys.stderr.write("\t entrezgene_locus_products_elem type: %s\n"%gene_commentary_type)
 										gene_commentary = self.returnGeneCommentary(entrezgene_locus_products_elem, entrezgene_mapping, session)
-										session.save_or_update(gene_commentary)
+										session.add(gene_commentary)
 										session.flush()
 								## some entrezgene_locus have commentary_comment
 								entrezgene_locus_genomic_commentary_comment_elems = el_sub_elem.find('Gene-commentary_comment')
 								if entrezgene_locus_genomic_commentary_comment_elems:
 									for tmp_elem in entrezgene_locus_genomic_commentary_comment_elems:
 										gene_commentary = self.returnGeneCommentary(tmp_elem, entrezgene_mapping, session)
-										session.save_or_update(gene_commentary)
+										session.add(gene_commentary)
 										session.flush()
 								
 								#submit to database
@@ -505,7 +507,8 @@ class GeneASNXML2gene_mapping:
 				counter += 1
 			if counter%5000==0:
 				session.flush()
-				session.clear()
+				#session.clear()	#2010-6-22 gone in 0.6
+				session.expunge_all()	# 2010-6-22 sqlalchemy 0.6
 			if self.report and counter%2000==0:
 				sys.stderr.write("%s\t%s/%s"%('\x08'*20, counter, real_counter))
 		if self.report:
@@ -521,9 +524,14 @@ class GeneASNXML2gene_mapping:
 					--return_location_list()
 				--submit_to_entrezgene_mapping_table()
 		"""
+		if self.debug:
+			import pdb
+			pdb.set_trace()
+		
 		sys.stderr.write("\tTotally, %d files to be processed.\n"%len(self.inputfiles))
 		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
-				   password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+					password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+		db.setup(create_tables=False)	#2010-6-22
 		session = db.session
 		if not self.debug:	#in debug mode, no transaction, auto-commit
 			session.begin()
