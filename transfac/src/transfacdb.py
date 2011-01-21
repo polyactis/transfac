@@ -33,49 +33,16 @@ import sys, os, math
 bit_number = math.log(sys.maxint)/math.log(2)
 if bit_number>40:       #64bit
 	sys.path.insert(0, os.path.expanduser('~/lib64/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/annot/bin')))
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64/microarray/bin')))
+	sys.path.insert(0, os.path.join(os.path.expanduser('~/script64')))
 else:   #32bit
 	sys.path.insert(0, os.path.expanduser('~/lib/python'))
-	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/annot/bin')))
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script/microarray/bin')))
+	sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 import psycopg, sys, getopt, csv, cStringIO, re
-from codense.common import db_connect, org_short2long
+from annot.bin.codense.common import db_connect, org_short2long
 from MdbId2UnigeneId import unigene_data_block_iterator
-
-class fasta_block_iterator:
-	'''
-	09-13-05
-		fasta format iterator
-		a little bit tricky, '>', the block starter is used as a tokenizer
-	2006-09-01
-		it seems 'for line in self.inf' doesn't work on hpc-cmb.
-		check https://dl403k-1.cmb.usc.edu/log/hpc-cmb
-	'''
-	def __init__(self, inf):
-		self.inf = inf
-		self.block = ''
-		self.previous_line = ''
-	def __iter__(self):
-		return self
-	def next(self):
-		self.read()
-		return self.block
-	def read(self):
-		self.block = self.previous_line	#don't forget the starting line
-		line = self.inf.readline()
-		while(line):
-			if line[0]=='>':
-				self.previous_line = line
-				if self.block:	#not the first time
-					break
-				else:	#first time to read the file, block is still empty
-					self.block += line
-			else:
-				self.block += line
-			line = self.inf.readline()
-		if self.block==self.previous_line:
-			raise StopIteration
+from pymodule.genome import fasta_block_iterator	#2011-1-5 moved to pymodule.genome
 
 class match_block_iterator:
 	'''
