@@ -103,15 +103,19 @@ class chromosome_fasta2db:
 	
 	def saveRawSequence(self, session, seq_to_db, passingdata, aa_attr_instance):
 		"""
+		2010-12-17
+			RawSequence.annot_assembly is a foreign key element now.
 		2008-07-29
 			to store one sequence segment
 		"""
 		passingdata.current_stop = passingdata.current_start+len(seq_to_db)-1
-		raw_sequence = RawSequence(annot_assembly_gi=aa_attr_instance.gi, start=passingdata.current_start, stop=passingdata.current_stop, sequence=seq_to_db)
+		raw_sequence = RawSequence(start=passingdata.current_start, stop=passingdata.current_stop, sequence=seq_to_db)
+		raw_sequence.annot_assembly = aa_attr_instance
 		session.add(raw_sequence)
 		if not passingdata.raw_sequence_initiated:
+			session.flush()	# 2010-12-17 to get raw_sequence.id
 			passingdata.raw_sequence_initiated = True
-			aa_attr_instance.raw_sequence_start = raw_sequence
+			aa_attr_instance.raw_sequence_start_id = raw_sequence.id
 		passingdata.current_start += len(seq_to_db)
 		
 	def parse_chromosome_fasta_file(self, session, filename, gzipped, tax_id=None, chunk_size=10000):
@@ -197,6 +201,7 @@ class chromosome_fasta2db:
 				#aa_attr_instance.raw_sequence_start_id = self.get_current_max_raw_sequence_id(curs, raw_sequence_table)+1
 				aa_attr_instance.sequence_type_id = sequence_type.id
 				aa_attr_instance.comment = header[4]	#store this whole thing for future reference
+			
 			passingdata = PassingData()
 			passingdata.current_start = 1
 			passingdata.raw_sequence_initiated = False
