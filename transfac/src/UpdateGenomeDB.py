@@ -50,7 +50,9 @@ class UpdateGenomeDB(object):
 								'ftp://ftp.ncbi.nih.gov/genomes/Arabidopsis_thaliana/CHR_II/NC_003071.fna',\
 								'ftp://ftp.ncbi.nih.gov/genomes/Arabidopsis_thaliana/CHR_III/NC_003074.fna',\
 								'ftp://ftp.ncbi.nih.gov/genomes/Arabidopsis_thaliana/CHR_IV/NC_003075.fna',\
-								'ftp://ftp.ncbi.nih.gov/genomes/Arabidopsis_thaliana/CHR_V/NC_003076.fna']}
+								'ftp://ftp.ncbi.nih.gov/genomes/Arabidopsis_thaliana/CHR_V/NC_003076.fna',\
+								'ftp://ftp.ncbi.nih.gov/refseq/release/mitochondrion/mitochondrion1.genomic.fna.gz',\
+								'ftp://ftp.ncbi.nih.gov/refseq/release/plastid/plastid1.genomic.fna.gz']}
 	
 	def __init__(self,  **keywords):
 		"""
