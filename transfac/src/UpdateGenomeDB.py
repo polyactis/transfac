@@ -60,12 +60,9 @@ class UpdateGenomeDB(object):
 		"""
 		from pymodule import ProcessOptions
 		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
-	
-	@classmethod
-	def getInputFileList(cls, file_source_ls, tmp_dir):
+		
+	def getInputFileList(self, file_source_ls, tmp_dir):
 		"""
-		2011-1-22
-			become classmethod
 		2010-12-14
 			create new directory if tmp_dir is not present
 		2008-07-06

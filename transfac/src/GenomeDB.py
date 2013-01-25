@@ -20,7 +20,7 @@ else:   #32bit
 	sys.path.insert(0, os.path.expanduser('~/lib/python'))
 	sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
-from pymodule.GenomeDB import *
+from pymodule.db.GenomeDB import *
 
 if __name__ == '__main__':
 	from pymodule import ProcessOptions

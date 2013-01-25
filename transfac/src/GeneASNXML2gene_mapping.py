@@ -208,14 +208,20 @@ class GeneASNXML2gene_mapping:
 					gi_ls.append(gi)
 		return start_ls, stop_ls, gi_ls
 	
-	def returnGeneSegments(self, elem, upper_elem_ins):
+	def returnGeneSegments(self, db, elem=None, gene_commentary=None, commentary_type=None):
 		"""
+		2012.5.15
+			add argument commentary_type to stop replicating gene_commentary.gene_commentary_type
 		2008-07-28
 		"""
 		start_ls, stop_ls, gi_ls = self.return_location_list(elem)
 		gene_segments = []
 		min_start = start_ls[0]
 		max_stop = stop_ls[0]
+		if commentary_type:
+			gene_commentary_type = db.getGeneCommentaryType(commentary_type=commentary_type)
+		else:
+			gene_commentary_type = gene_commentary.gene_commentary_type
 		for i in range(len(start_ls)):
 			start = start_ls[i]
 			stop = stop_ls[i]
@@ -226,7 +232,8 @@ class GeneASNXML2gene_mapping:
 			if max_start_stop > max_stop:
 				max_stop = max_start_stop
 			gi = gi_ls[i]
-			gene_segment = GeneSegment(start=start, stop=stop, gi=gi, gene_commentary_type_id=upper_elem_ins.gene_commentary_type_id)
+			gene_segment = GeneSegment(start=start, stop=stop, gi=gi, gene_commentary_type=gene_commentary_type)
+			gene_segment.gene_commentary = gene_commentary
 			gene_segments.append(gene_segment)
 		passingdata = PassingData()
 		passingdata.gene_segments = gene_segments
@@ -236,6 +243,8 @@ class GeneASNXML2gene_mapping:
 	
 	def returnGeneCommentary(self, elem, entrezgene_mapping, session, type=1):
 		"""
+		2012.5.15
+			use self.db.getGeneCommentaryType() to get gene_commentary_type
 		2008-07-29
 			type is useless, GeneCommentary and GeneProduct merged
 		2008-07-28
@@ -243,14 +252,8 @@ class GeneASNXML2gene_mapping:
 			type=2, GeneProduct ( GeneCommentary in 'Gene-commentary_products')
 		"""		
 		commentary_type_id = int(elem.findtext('Gene-commentary_type'))
-		gene_commentary_type = GeneCommentaryType.query.get(commentary_type_id)
-		if not gene_commentary_type:
-			if self.debug:
-				sys.stderr.write("\t Gene-commentary_type=%s not in db yet.\n"%commentary_type_id)
-			commentary_type = elem.find('Gene-commentary_type').get('value')
-			gene_commentary_type = GeneCommentaryType(id=commentary_type_id, type=commentary_type)
-			session.add(gene_commentary_type)
-			session.flush()
+		commentary_type = elem.find('Gene-commentary_type').get('value')
+		gene_commentary_type = self.db.getGeneCommentaryType(commentary_type=commentary_type)	#no passing of commentary_type_id
 		
 		if self.debug:
 			sys.stderr.write("\t getting gene_commentary. type=%s.\n"%(gene_commentary_type.type))
@@ -262,12 +265,19 @@ class GeneASNXML2gene_mapping:
 		
 		gene_commentary = GeneCommentary(label=label, accession=accession, version=version,\
 										text=text, gi=gi)
-		gene_commentary.gene_commentary_type_id = commentary_type_id
+		gene_commentary.gene_commentary_type = gene_commentary_type
 		gene_commentary.gene_id = entrezgene_mapping.id
 		#for the coordinates
 		genomic_coords_elem = elem.find('Gene-commentary_genomic-coords')
 		if genomic_coords_elem:
-			passingdata = self.returnGeneSegments(genomic_coords_elem, gene_commentary)
+			if gene_commentary_type.type=='peptide':
+				segment_commentary_type = 'CDS'
+			elif gene_commentary_type.type=='mRNA':
+				segment_commentary_type = 'exon'
+			else:
+				segment_commentary_type = None
+			passingdata = self.returnGeneSegments(self.db, elem=genomic_coords_elem, gene_commentary=gene_commentary, \
+												commentary_type=segment_commentary_type)
 			if passingdata.gene_segments:
 				gene_commentary.gene_segments = passingdata.gene_segments
 				gene_commentary.start = passingdata.start
@@ -456,13 +466,15 @@ class GeneASNXML2gene_mapping:
 							if self.debug:
 								sys.stderr.write("\t Entrezgene_locus genomic gi=%s.\n"%(gi))
 							### ensure this gi is present in annot_assembly_table
-							if AnnotAssembly.query.get(gi):
-							#if self.is_gi_valid_in_annot_assembly_table(curs, gi, annot_assembly_table):
+							annot_assembly = AnnotAssembly.query.get(gi)
+							if annot_assembly:
+								#if self.is_gi_valid_in_annot_assembly_table(curs, gi, annot_assembly_table):
 								if self.debug:
 									sys.stderr.write("\t gi=%s found in annot_assembly_table.\n"%(gi))
 								entrezgene_mapping.genomic_gi = gi
 								entrezgene_mapping.genomic_accession = el_sub_elem.findtext('Gene-commentary_accession')
 								entrezgene_mapping.genomic_version = int(el_sub_elem.findtext('Gene-commentary_version'))
+								entrezgene_mapping.genomic_annot_assembly = annot_assembly	#2012.4.26 add the assembly
 								strand_elem = seq_interval_elem.find('Seq-interval_strand/Na-strand')
 								if strand_elem!=None:	#strand could be missing,
 									#WATCH strand_elem has no children(len(strand_elem)=0), so 'if strand_elem:' doesn't work
@@ -532,6 +544,7 @@ class GeneASNXML2gene_mapping:
 		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
 					password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
 		db.setup(create_tables=False)	#2010-6-22
+		self.db = db
 		session = db.session
 		if not self.debug:	#in debug mode, no transaction, auto-commit
 			session.begin()
