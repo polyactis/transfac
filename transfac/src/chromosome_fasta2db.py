@@ -45,7 +45,6 @@ sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
 
 #sys.path += [os.path.join(os.path.expanduser('~/script'))]
-from annot.bin.codense.common import db_connect, org_short2long, org2tax_id
 from pymodule.db.GenomeDB import *
 from pymodule import PassingData, utils, AbstractDBInteractingJob
 from pymodule.utils import FigureOutTaxID
@@ -100,6 +99,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		self.FigureOutTaxID_ins = FigureOutTaxID(db_user=self.db_user,
 								db_passwd=self.db_passwd, hostname=self.hostname, dbname=self.dbname)
 		if self.organism is not None:
+			from annot.bin.codense.common import org_short2long, org2tax_id
 			if org_short2long(self.organism):
 				self.tax_id = org2tax_id(org_short2long(self.organism))
 			else:
@@ -239,7 +239,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		inf = utils.open(filename, 'r')
+		inf = utils.openGzipFile(filename, openMode='r')
 		
 		line = inf.readline()
 		new_fasta_block = 1	#'line' is not enough to stop the 'while' loop. after the file reading is exhausted by "for line in inf:", 'line' still contains the stuff from the last line.
@@ -348,7 +348,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		for filename in self.inputFnameLs:
 			sys.stderr.write("%d/%d:\t%s\n"%(self.inputFnameLs.index(filename)+1,\
 											len(self.inputFnameLs),filename))
-			self.parse_chromosome_fasta_file(db=db, filename=filename, tax_id=self.tax_id, \
+			self.parse_chromosome_fasta_file(db=self.db, filename=filename, tax_id=self.tax_id, \
 									sequence_type_name=self.sequence_type_name, \
 									sequence_type_id=self.sequence_type_id,\
 									run_type=self.run_type, maxNoOfFastaRecords=self.maxNoOfFastaRecords)
