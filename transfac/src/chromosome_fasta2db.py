@@ -15,12 +15,12 @@ Examples:
 	
 	# 2011-7-7 put BACs into db
 	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit
-		-y 3 -b --report --sequence_name BAC -g "Chlorocebus aethiops"
+		-y 3 -b --report --sequence_type_name BAC -g "Chlorocebus aethiops"
 		-i script/vervet/data/ref/BAC/BAC.accession.fasta
 	
 	# 2011-7-7 put 1000 scaffolds (order in the file) into db
 	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit -y 2
-		--report --sequence_name Scaffold -g "Chlorocebus aethiops" -x 1000
+		--report --sequence_type_name Scaffold -g "Chlorocebus aethiops" -x 1000
 		-i script/vervet/data/Draft_June_2011/supercontigs/supercontigs.fasta
 	
 Description:
