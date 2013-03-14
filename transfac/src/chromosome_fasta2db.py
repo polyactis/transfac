@@ -2,22 +2,26 @@
 """
 
 Examples:
-	chromosome_fasta2db.py -c -i *.fa.gz
+	%s --commit *.fa.gz
 	
 	#for mysql
-	chromosome_fasta2db.py -v mysql -u yh -z papaya -d genome -k "" -c -i *.fa.gz
-	chromosome_fasta2db.py -v mysql -u yh -z papaya -d genome -k "" -c -i /usr/local/research_data/ncbi/genomes_2008_07_29/mitochondrion1.genomic.fna.gz -b -r
+	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit  *.fa.gz
+	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit -b --report 
+		/usr/local/research_data/ncbi/genomes_2008_07_29/mitochondrion1.genomic.fna.gz
 	
 	#take only A. thaliana's mitochondrion
-	chromosome_fasta2db.py -v mysql -u yh -z papaya -d genome -k "" -c -i mitochondrion1.genomic.fna.gz -b -r -g at
+	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit  -b --report -g at
+		mitochondrion1.genomic.fna.gz
 	
 	# 2011-7-7 put BACs into db
-	chromosome_fasta2db.py -u yh -k genome -d vervetdb -v postgresql -c -i script/vervet/data/ref/BAC/BAC.accession.fasta
-		-y 3 -b -r -s BAC -g "Chlorocebus aethiops"
+	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit
+		-y 3 -b --report --sequence_name BAC -g "Chlorocebus aethiops"
+		-i script/vervet/data/ref/BAC/BAC.accession.fasta
 	
 	# 2011-7-7 put 1000 scaffolds (order in the file) into db
-	chromosome_fasta2db.py -u yh -k genome -d vervetdb -v postgresql -c 
-	-i script/vervet/data/Draft_June_2011/supercontigs/supercontigs.fasta -y 2  -r -s Scaffold -g "Chlorocebus aethiops" -x 1000
+	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit -y 2
+		--report --sequence_name Scaffold -g "Chlorocebus aethiops" -x 1000
+		-i script/vervet/data/Draft_June_2011/supercontigs/supercontigs.fasta
 	
 Description:
 	Parse the chromosome sequence files (fasta format) downloaded from
@@ -35,10 +39,15 @@ Description:
 """
 
 import sys, getopt, os, re, gzip
-sys.path += [os.path.join(os.path.expanduser('~/script'))]
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+
+sys.path.insert(0, os.path.expanduser('~/lib/python'))
+sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
+
+#sys.path += [os.path.join(os.path.expanduser('~/script'))]
 from annot.bin.codense.common import db_connect, org_short2long, org2tax_id
-from pymodule.GenomeDB import *
-from pymodule import PassingData
+from pymodule.db.GenomeDB import *
+from pymodule import PassingData, utils, AbstractDBInteractingJob
 from pymodule.utils import FigureOutTaxID
 #from pymodule.db import db_connect
 
@@ -62,34 +71,31 @@ class annot_assembly_attr:
 		self.seq_type = None
 		self.comment = None
 
-class chromosome_fasta2db:
+class chromosome_fasta2db(AbstractDBInteractingJob):
 	__doc__ = __doc__
-	option_default_dict = {('drivername', 1,):['postgres', 'v', 1, 'which type of database? mysql or postgres', ],\
-							('hostname', 1, ): ['localhost', 'z', 1, 'hostname of the db server', ],\
-							('dbname', 1, ): ['graphdb', 'd', 1, 'database name', ],\
-							('schema', 1, ): ['genome', 'k', 1, 'database schema name', ],\
-							('db_user', 1, ): [None, 'u', 1, 'database username', ],\
-							('db_passwd', 1, ): [None, 'p', 1, 'database password', ],\
-							('inputfiles', 1, ):[None, 'i', 1, 'comma-separated input filenames, or a list of files'],\
+	option_default_dict = AbstractDBInteractingJob.option_default_dict.copy()
+	option_default_dict.update({
 							('organism', 0, ): [None, 'g', 1, '2-letter abbreviation for organism. Optional, if specified, only sequence from this organism would be extracted.'],\
-							('sequence_type_name', 1, ):['chromosome sequence', 's', 1, 'short name in table sequence_type'],\
-							('run_type', 1, int):[1, 'y', 1, 'run type. 1: genBank fasta files. 2: scaffolds from WUSTL. 3: fully sequenced vervet BACs. 4: fully-sequenced vervet BAC ends'],\
-							('maxNoOfFastaRecords', 1, int):[500, 'x', 1, 'maximum number of fasta records to be inserted (in whatever order)'],\
-							('commit', 0, int):[0, 'c', 0, 'commit db transaction'],\
-							('debug', 0, int):[0, 'b', 0, 'toggle debug mode'],\
-							('report', 0, int):[0, 'r', 0, 'toggle report, more verbose stdout/stderr.']}
-	def __init__(self,  **keywords):
+							('sequence_type_id', 0, int):[9, '', 0, 'used to fetch chromosome info from GenomeDB'],\
+							('sequence_type_name', 0, ):[None, 's', 1, 'column type in table sequence_type'],\
+							('tax_id', 0, int):[60711, '', 0, 'taxonomy ID, if not given, query argument organism against tax db'],\
+							('version', 0, int):[1, '', 0, 'which version'],\
+							('run_type', 1, int):[1, 'y', 1, 'run type. 1: genBank fasta files. 2: scaffolds from WUSTL. 3: fully sequenced vervet BACs. 4: fully--sequence_nameequenced vervet BAC ends'],\
+							('maxNoOfFastaRecords', 1, int):[500, 'x', 1, 'maximum number of fasta records to be inserted (in the input file order)'],\
+							})
+	option_default_dict[('schema', 0, )][0] = 'genome'
+	option_default_dict.pop((('outputFname', 0, )))
+	
+	def __init__(self, inputFnameLs=None, **keywords):
 		"""
 		2008-07-27
 			use option_default_dict
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		from pymodule import ProcessOptions
-		self.ad = ProcessOptions.process_function_arguments(keywords, self.option_default_dict, error_doc=self.__doc__, class_to_have_attr=self)
+		AbstractDBInteractingClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		#self.connectDB() called within its __init__()
 		
-		if type(self.inputfiles)==str:
-			self.inputfiles = self.inputfiles.split(',')
 		
 		self.FigureOutTaxID_ins = FigureOutTaxID(db_user=self.db_user,
 								db_passwd=self.db_passwd, hostname=self.hostname, dbname=self.dbname)
@@ -98,9 +104,6 @@ class chromosome_fasta2db:
 				self.tax_id = org2tax_id(org_short2long(self.organism))
 			else:
 				self.tax_id = self.FigureOutTaxID_ins.returnTaxIDGivenSentence(self.organism)
-		
-		else:
-			self.tax_id=None
 		
 		#self.p_chromosome = re.compile(r'[a-zA-Z]+_chr(\w+).fa')
 		self.p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')	#the last ? means [,\n\r] is optional
@@ -212,8 +215,8 @@ class chromosome_fasta2db:
 		comment = header[4]
 		return PassingData(tax_id=_tax_id, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
 	
-	def parse_chromosome_fasta_file(self, session, filename, gzipped, tax_id=None, chunk_size=10000, \
-								sequence_type_name='chromosome sequence', run_type=1,
+	def parse_chromosome_fasta_file(self, db=None, filename=None, tax_id=None, version=None, chunk_size=10000, \
+								sequence_type_name=None, sequence_type_id=None, run_type=1,
 								maxNoOfFastaRecords=500):
 		"""
 		2011-7-10
@@ -236,10 +239,7 @@ class chromosome_fasta2db:
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		if gzipped:
-			inf = gzip.open(filename, 'r')
-		else:
-			inf = open(filename, 'r')
+		inf = utils.open(filename, 'r')
 		
 		line = inf.readline()
 		new_fasta_block = 1	#'line' is not enough to stop the 'while' loop. after the file reading is exhausted by "for line in inf:", 'line' still contains the stuff from the last line.
@@ -261,10 +261,11 @@ class chromosome_fasta2db:
 				continue
 			
 			chromosome = headerData.chromosome
-			sequence_type = SequenceType.query.filter_by(type=sequence_type_name).first()
+			sequence_type = db.getSequenceType(short_name=sequence_type_name, id=sequence_type_id)
 			start = 1
-			aa_attr_instance = AnnotAssembly.query.filter_by(chromosome=chromosome).filter_by(tax_id=tax_id).filter_by(start=start).\
-				filter_by(sequence_type_id=sequence_type.id).first()
+			aa_attr_instance = db.checkAnnotAssembly(version=version, tax_id=tax_id, \
+								chromosome=chromosome, start=start, stop=None, \
+								sequence_type_id=sequence_type.id)
 			if aa_attr_instance and aa_attr_instance.raw_sequence_start_id is not None:
 				# if raw sequences have been associated with this AnnotAssembly and 
 				sys.stderr.write("raw sequences have been associated with this AnnotAssembly (tax_id %s, chr=%s, start=%s). Ignore.\n"%\
@@ -274,25 +275,21 @@ class chromosome_fasta2db:
 				continue
 			if aa_attr_instance is None:
 				aa_attr_instance = AnnotAssembly()
-				aa_attr_instance.gi = headerData.gi
-				aa_attr_instance.acc_ver = headerData.acc_ver
+				db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession =None, \
+						version =None, tax_id=tax_id, chromosome =chromosome, \
+						start =start, stop =None, orientation=None, sequence = None,\
+						raw_sequence_start_id=None, original_path=os.path.abspath(filename),\
+						sequence_type_id=sequence_type.id, \
+						chromosome_type_id=None, chromosome_type_name=None, comment=headerData.comment)
 				if aa_attr_instance.acc_ver and self.p_acc_ver.search(aa_attr_instance.acc_ver):
 					aa_attr_instance.accession, aa_attr_instance.version = self.p_acc_ver.search(aa_attr_instance.acc_ver).groups()
 					aa_attr_instance.version = int(aa_attr_instance.version)
 				else:
 					aa_attr_instance.accession = None
-					aa_attr_instance.version = None
-				aa_attr_instance.tax_id = tax_id
+					aa_attr_instance.version = version
 				if self.debug:
 					sys.stderr.write("tax_id=%s for %s.\n"%(aa_attr_instance.tax_id, line))
-				
-				
-				aa_attr_instance.chromosome = chromosome
-				aa_attr_instance.start = 1
 				#aa_attr_instance.raw_sequence_start_id = self.get_current_max_raw_sequence_id(curs, raw_sequence_table)+1
-				aa_attr_instance.sequence_type_id = sequence_type.id
-				aa_attr_instance.comment = headerData.comment	#store this whole thing for future reference
-			
 			passingdata = PassingData()
 			passingdata.current_start = 1
 			passingdata.raw_sequence_initiated = False
@@ -300,7 +297,7 @@ class chromosome_fasta2db:
 			for line in inf:
 				if line[0]=='>':
 					if seq:	#last segment from the previous fasta block
-						self.saveRawSequence(session, seq, passingdata, aa_attr_instance)
+						self.saveRawSequence(db.session, seq, passingdata, aa_attr_instance)
 						seq = ''	#set to nothing to avoid saving one more RawSequence
 					new_fasta_block = 1
 					break	#start from while again
@@ -308,15 +305,15 @@ class chromosome_fasta2db:
 				seq += line.strip()
 				if len(seq)>=chunk_size:
 					seq_to_db = seq[:chunk_size]
-					self.saveRawSequence(session, seq_to_db, passingdata, aa_attr_instance)
+					self.saveRawSequence(db.session, seq_to_db, passingdata, aa_attr_instance)
 					seq = seq[chunk_size:]	#remove the one already in db
 					if self.report:
 						sys.stderr.write("%s\t%s\t%s"%('\x08'*20, no_of_fasta_blocks, passingdata.current_start/chunk_size+1))
 			if seq:	# last segment from last line
-				self.saveRawSequence(session, seq, passingdata, aa_attr_instance)
+				self.saveRawSequence(db.session, seq, passingdata, aa_attr_instance)
 			aa_attr_instance.stop = passingdata.current_stop
-			session.add(aa_attr_instance)
-			session.flush()
+			db.session.add(aa_attr_instance)
+			db.session.flush()
 			no_of_fasta_blocks += 1
 			if no_of_fasta_blocks>=maxNoOfFastaRecords:
 				break
@@ -324,7 +321,15 @@ class chromosome_fasta2db:
 			sys.stderr.write("Number of fasta blocks: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
-	
+	def connectDB(self):
+		"""
+		2013.3.14
+		"""
+		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
+						password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
+		db.setup(create_tables=False)
+		self.db = db
+		
 	def run(self):
 		"""
 		2008-07-27
@@ -336,19 +341,16 @@ class chromosome_fasta2db:
 			import pdb
 			pdb.set_trace()
 		
-		sys.stderr.write("\tTotally, %d files to be processed.\n"%len(self.inputfiles))
-		db = GenomeDatabase(drivername=self.drivername, username=self.db_user,
-						password=self.db_passwd, hostname=self.hostname, database=self.dbname, schema=self.schema)
-		db.setup(create_tables=False)
-		session = db.session
+		sys.stderr.write("\tTotally, %d files to be processed.\n"%(len(self.inputFnameLs)))
+		
+		session = self.db.session
 		session.begin()
-		for f in self.inputfiles:
-			sys.stderr.write("%d/%d:\t%s\n"%(self.inputfiles.index(f)+1,len(self.inputfiles),f))
-			if f[-2:]=='gz':	#turn on the gzip flag based on the filename extension
-				gzipped=1
-			else:
-				gzipped=0
-			self.parse_chromosome_fasta_file(session, f, gzipped, self.tax_id, sequence_type_name=self.sequence_type_name, \
+		for filename in self.inputFnameLs:
+			sys.stderr.write("%d/%d:\t%s\n"%(self.inputFnameLs.index(filename)+1,\
+											len(self.inputFnameLs),filename))
+			self.parse_chromosome_fasta_file(db=db, filename=filename, tax_id=self.tax_id, \
+									sequence_type_name=self.sequence_type_name, \
+									sequence_type_id=self.sequence_type_id,\
 									run_type=self.run_type, maxNoOfFastaRecords=self.maxNoOfFastaRecords)
 		if self.commit:
 			session.commit()
