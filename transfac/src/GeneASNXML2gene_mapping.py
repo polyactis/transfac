@@ -25,7 +25,6 @@ Description:
 
 import sys, getopt, os
 sys.path += [os.path.join(os.path.expanduser('~/script/annot/bin'))]
-from codense.common import db_connect
 import xml.etree.cElementTree as ElementTree
 from GenomeDB import GenomeDatabase, Gene, SequenceType, EntrezgeneType, \
 	GeneSegment, GeneCommentaryType, GeneCommentary, AnnotAssembly
@@ -88,41 +87,41 @@ class GeneASNXML2gene_mapping:
 			'snRNA':self.find_rna_info,
 			'mRNA':self.find_mrna_info}
 		
-	def submit_to_entrezgene_mapping_table(self, curs, table, em_attr_instance):
+	def submit_to_entrezgene_mapping_table(self, curs, table, entrezgene_mapping):
 		"""
 		2008-07-27
 			deprecated
 		"""
-		if em_attr_instance.mrna_acc_ver and em_attr_instance.cds_acc_ver:	#both rna and peptide present
+		if entrezgene_mapping.mrna_acc_ver and entrezgene_mapping.cds_acc_ver:	#both rna and peptide present
 			curs.execute("insert into %s(gene_id, tax_id, genomic_acc_ver, genomic_gi, strand, \
 			start, stop, mrna_acc_ver, mrna_gi, mrna_start,\
 			mrna_stop, cds_acc_ver, cds_gi, cds_start, cds_stop) values('%s', %s, '%s', %s, %s,\
 			%s, %s, '%s', %s, ARRAY%s, \
 			ARRAY%s, '%s', %s, ARRAY%s, ARRAY%s)"%(table,\
-			em_attr_instance.gene_id, em_attr_instance.tax_id, em_attr_instance.genomic_acc_ver, em_attr_instance.genomic_gi, em_attr_instance.strand,\
-			em_attr_instance.start, em_attr_instance.stop, em_attr_instance.mrna_acc_ver, em_attr_instance.mrna_gi, repr(em_attr_instance.mrna_start),\
-			repr(em_attr_instance.mrna_stop), em_attr_instance.cds_acc_ver, em_attr_instance.cds_gi, repr(em_attr_instance.cds_start), repr(em_attr_instance.cds_stop)))
-		elif em_attr_instance.mrna_acc_ver:	#only rna
+			entrezgene_mapping.gene_id, entrezgene_mapping.tax_id, entrezgene_mapping.genomic_acc_ver, entrezgene_mapping.genomic_gi, entrezgene_mapping.strand,\
+			entrezgene_mapping.start, entrezgene_mapping.stop, entrezgene_mapping.mrna_acc_ver, entrezgene_mapping.mrna_gi, repr(entrezgene_mapping.mrna_start),\
+			repr(entrezgene_mapping.mrna_stop), entrezgene_mapping.cds_acc_ver, entrezgene_mapping.cds_gi, repr(entrezgene_mapping.cds_start), repr(entrezgene_mapping.cds_stop)))
+		elif entrezgene_mapping.mrna_acc_ver:	#only rna
 			curs.execute("insert into %s(gene_id, tax_id, genomic_acc_ver, genomic_gi, strand, \
 			start, stop, mrna_acc_ver, mrna_gi, mrna_start,\
 			mrna_stop) values('%s', %s, '%s', %s, %s,\
 			%s, %s, '%s', %s, ARRAY%s, \
 			ARRAY%s)"%(table,\
-			em_attr_instance.gene_id, em_attr_instance.tax_id, em_attr_instance.genomic_acc_ver, em_attr_instance.genomic_gi, em_attr_instance.strand,\
-			em_attr_instance.start, em_attr_instance.stop, em_attr_instance.mrna_acc_ver, em_attr_instance.mrna_gi, repr(em_attr_instance.mrna_start),\
-			repr(em_attr_instance.mrna_stop) ))
-		elif em_attr_instance.cds_acc_ver:	#only peptide
+			entrezgene_mapping.gene_id, entrezgene_mapping.tax_id, entrezgene_mapping.genomic_acc_ver, entrezgene_mapping.genomic_gi, entrezgene_mapping.strand,\
+			entrezgene_mapping.start, entrezgene_mapping.stop, entrezgene_mapping.mrna_acc_ver, entrezgene_mapping.mrna_gi, repr(entrezgene_mapping.mrna_start),\
+			repr(entrezgene_mapping.mrna_stop) ))
+		elif entrezgene_mapping.cds_acc_ver:	#only peptide
 			curs.execute("insert into %s(gene_id, tax_id, genomic_acc_ver, genomic_gi, strand, \
 			start, stop, cds_acc_ver, cds_gi, cds_start, cds_stop) values('%s', %s, '%s', %s, %s,\
 			%s, %s, '%s', %s, ARRAY%s, ARRAY%s)"%(table,\
-			em_attr_instance.gene_id, em_attr_instance.tax_id, em_attr_instance.genomic_acc_ver, em_attr_instance.genomic_gi, em_attr_instance.strand,\
-			em_attr_instance.start, em_attr_instance.stop, em_attr_instance.cds_acc_ver, em_attr_instance.cds_gi, repr(em_attr_instance.cds_start), repr(em_attr_instance.cds_stop)))
+			entrezgene_mapping.gene_id, entrezgene_mapping.tax_id, entrezgene_mapping.genomic_acc_ver, entrezgene_mapping.genomic_gi, entrezgene_mapping.strand,\
+			entrezgene_mapping.start, entrezgene_mapping.stop, entrezgene_mapping.cds_acc_ver, entrezgene_mapping.cds_gi, repr(entrezgene_mapping.cds_start), repr(entrezgene_mapping.cds_stop)))
 		else:	#only genomic location
 			curs.execute("insert into %s(gene_id, tax_id, genomic_acc_ver, genomic_gi, strand, \
 			start, stop) values('%s', %s, '%s', %s, %s,\
 			%s, %s)"%(table,\
-			em_attr_instance.gene_id, em_attr_instance.tax_id, em_attr_instance.genomic_acc_ver, em_attr_instance.genomic_gi, em_attr_instance.strand,\
-			em_attr_instance.start, em_attr_instance.stop))
+			entrezgene_mapping.gene_id, entrezgene_mapping.tax_id, entrezgene_mapping.genomic_acc_ver, entrezgene_mapping.genomic_gi, entrezgene_mapping.strand,\
+			entrezgene_mapping.start, entrezgene_mapping.stop))
 	
 	def is_gi_valid_in_annot_assembly_table(self, curs, gi, annot_assembly_table):
 		"""
@@ -324,13 +323,13 @@ class GeneASNXML2gene_mapping:
 			deprecated	
 		11-13-05 for peptide
 		"""
-		em_attr_instance.cds_start, em_attr_instance.cds_stop, cds_loc_gi = self.return_location_list(elem)
-		if cds_gi:
-			em_attr_instance.cds_gi = cds_gi
+		entrezgene_mapping.cds_start, entrezgene_mapping.cds_stop, cds_loc_gi = self.return_location_list(elem)
+		if cds_loc_gi:
+			entrezgene_mapping.cds_gi = cds_loc_gi
 		else:	#use the gi where the sequence is from
-			em_attr_instance.cds_gi = cds_loc_gi
+			entrezgene_mapping.cds_gi = cds_loc_gi
 	
-	def find_rna_info(self, elem, em_attr_instance):
+	def find_rna_info(self, elem, entrezgene_mapping):
 		"""
 		2008-07-28
 			deprecated
@@ -340,46 +339,46 @@ class GeneASNXML2gene_mapping:
 		label = elem.findtext('Gene-commentary_label')
 		version = elem.findtext('Gene-commentary_version')
 		if accession:
-			em_attr_instance.mrna_acc_ver = accession + '.' + version
+			entrezgene_mapping.mrna_acc_ver = accession + '.' + version
 		elif label:
-			em_attr_instance.mrna_acc_ver = label
+			entrezgene_mapping.mrna_acc_ver = label
 		else:
-			em_attr_instance.mrna_acc_ver = version
+			entrezgene_mapping.mrna_acc_ver = version
 		mrna_gi = elem.findtext('Gene-commentary_seqs/Seq-loc/Seq-loc_whole/Seq-id/Seq-id_gi')
-		em_attr_instance.mrna_start, em_attr_instance.mrna_stop, mrna_loc_gi = self.return_location_list(elem)
+		entrezgene_mapping.mrna_start, entrezgene_mapping.mrna_stop, mrna_loc_gi = self.return_location_list(elem)
 		if mrna_gi:
-			em_attr_instance.mrna_gi = mrna_gi
+			entrezgene_mapping.mrna_gi = mrna_gi
 		else:	#use the gi where the sequence is from
-			em_attr_instance.mrna_gi = mrna_loc_gi
+			entrezgene_mapping.mrna_gi = mrna_loc_gi
 	
-	def find_mrna_info(self, mrna_elem, em_attr_instance):
+	def find_mrna_info(self, mrna_elem, entrezgene_mapping):
 		"""
 		2008-07-28
 			deprecated
 		11-13-05 for mRNA and its peptide
 		"""
 		#handle mRNA stuff
-		em_attr_instance.mrna_acc_ver = mrna_elem.findtext('Gene-commentary_accession')\
+		entrezgene_mapping.mrna_acc_ver = mrna_elem.findtext('Gene-commentary_accession')\
 			+'.'+mrna_elem.findtext('Gene-commentary_version')
 		mrna_gi = mrna_elem.findtext('Gene-commentary_seqs/Seq-loc/Seq-loc_whole/Seq-id/Seq-id_gi')
-		em_attr_instance.mrna_start, em_attr_instance.mrna_stop, mrna_loc_gi = self.return_location_list(mrna_elem)
+		entrezgene_mapping.mrna_start, entrezgene_mapping.mrna_stop, mrna_loc_gi = self.return_location_list(mrna_elem)
 		if mrna_gi:
-			em_attr_instance.mrna_gi = mrna_gi
+			entrezgene_mapping.mrna_gi = mrna_gi
 		else:	#use the gi where the sequence is from
-			em_attr_instance.mrna_gi = mrna_loc_gi
+			entrezgene_mapping.mrna_gi = mrna_loc_gi
 		#handle the cds stuff
 		cds_elem = mrna_elem.find('Gene-commentary_products/Gene-commentary')
 		if cds_elem:
-			em_attr_instance.cds_acc_ver = cds_elem.findtext('Gene-commentary_accession')\
+			entrezgene_mapping.cds_acc_ver = cds_elem.findtext('Gene-commentary_accession')\
 				+'.'+cds_elem.findtext('Gene-commentary_version')
 			cds_gi = cds_elem.findtext('Gene-commentary_seqs/Seq-loc/Seq-loc_whole/Seq-id/Seq-id_gi')
-			em_attr_instance.cds_start, em_attr_instance.cds_stop, cds_loc_gi = self.return_location_list(cds_elem)
+			entrezgene_mapping.cds_start, entrezgene_mapping.cds_stop, cds_loc_gi = self.return_location_list(cds_elem)
 			if cds_gi:
-				em_attr_instance.cds_gi = cds_gi
+				entrezgene_mapping.cds_gi = cds_gi
 			else:	#use the gi where the sequence is from
-				em_attr_instance.cds_gi = cds_loc_gi
+				entrezgene_mapping.cds_gi = cds_loc_gi
 		else:
-			sys.stderr.write("\t gene_id: %s has no cds_elem.\n"%(em_attr_instance.gene_id))
+			sys.stderr.write("\t gene_id: %s has no cds_elem.\n"%(entrezgene_mapping.gene_id))
 	
 	def return_datetime(self, date_elem):
 		"""
@@ -417,8 +416,8 @@ class GeneASNXML2gene_mapping:
 				if status=='live':
 					if self.debug:
 						sys.stderr.write("gene_id=%s status: %s\n"%(gene_id, status))
-					#em_attr_instance = entrezgene_mapping_attr()
-					#em_attr_instance.gene_id = elem.findtext('Entrezgene_track-info/Gene-track/Gene-track_geneid')
+					#entrezgene_mapping = entrezgene_mapping_attr()
+					#entrezgene_mapping.gene_id = elem.findtext('Entrezgene_track-info/Gene-track/Gene-track_geneid')
 					entrezgene_mapping = Gene.query.filter_by(ncbi_gene_id=gene_id).first()
 					if entrezgene_mapping is None:
 						entrezgene_mapping = Gene(ncbi_gene_id=gene_id)
@@ -510,7 +509,7 @@ class GeneASNXML2gene_mapping:
 										session.flush()
 								
 								#submit to database
-								#self.submit_to_entrezgene_mapping_table(curs, table, em_attr_instance)
+								#self.submit_to_entrezgene_mapping_table(curs, table, entrezgene_mapping)
 								real_counter += 1
 							else:
 								sys.stderr.write("\t Warning: genomic_gi=%s, not in annot_assembly_table gene_id=%s\n"%(gi, gene_id))
