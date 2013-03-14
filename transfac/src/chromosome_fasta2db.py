@@ -5,24 +5,31 @@ Examples:
 	%s --commit *.fa.gz
 	
 	#for mysql
-	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit  *.fa.gz
-	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit -b --report 
+	%s --drivername mysql -u yh --hostname papaya --dbname genome --schema "" --commit  *.fa.gz
+	%s --drivername mysql -u yh --hostname papaya --dbname genome --schema "" --commit -b --report 
 		/usr/local/research_data/ncbi/genomes_2008_07_29/mitochondrion1.genomic.fna.gz
 	
 	#take only A. thaliana's mitochondrion
-	%s -v mysql -u yh --hostname papaya --dbname genome --schema "" --commit  -b --report -g at
+	%s --drivername mysql -u yh --hostname papaya --dbname genome --schema "" --commit  -b --report -g at
 		mitochondrion1.genomic.fna.gz
 	
 	# 2011-7-7 put BACs into db
-	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit
+	%s -u yh --schema genome --dbname vervetdb --drivername postgresql --commit
 		-y 3 -b --report --sequence_type_name BAC -g "Chlorocebus aethiops"
 		-i script/vervet/data/ref/BAC/BAC.accession.fasta
 	
 	# 2011-7-7 put 1000 scaffolds (order in the file) into db
-	%s -u yh --schema genome --dbname vervetdb -v postgresql --commit -y 2
+	%s -u yh --schema genome --dbname vervetdb --drivername postgresql --commit -y 2
 		--report --sequence_type_name Scaffold -g "Chlorocebus aethiops" -x 1000
 		-i script/vervet/data/Draft_June_2011/supercontigs/supercontigs.fasta
 	
+	#2013.3.14 add vervet ref 6.0.3 into db
+	%s -u yh --schema genome --dbname vervetdb --drivername postgresql
+		--commit -y2 --sequence_type_id 9 -z uclaOffice
+		--tax_id 60711 -x 10000
+		-i ~/mnt//hoffman2/u/home/eeskin2/polyacti/NetworkData/vervet/raw_sequence/wustl_gxfer1_78364318756303_ref6.0.3/supercontigs.fasta.gz
+		--db_passwd secret --version 2
+
 Description:
 	Parse the chromosome sequence files (fasta format) downloaded from
 		ftp://ftp.ncbi.nih.gov/genomes/ORGANISM/Assembled_chromosomes/
@@ -39,7 +46,7 @@ Description:
 """
 
 import sys, getopt, os, re, gzip
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
@@ -75,10 +82,10 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 	option_default_dict = AbstractDBInteractingJob.option_default_dict.copy()
 	option_default_dict.update({
 							('organism', 0, ): [None, 'g', 1, '2-letter abbreviation for organism. Optional, if specified, only sequence from this organism would be extracted.'],\
-							('sequence_type_id', 0, int):[9, '', 0, 'used to fetch chromosome info from GenomeDB'],\
+							('sequence_type_id', 0, int):[9, '', 1, 'used to fetch chromosome info from GenomeDB'],\
 							('sequence_type_name', 0, ):[None, 's', 1, 'column type in table sequence_type'],\
-							('tax_id', 0, int):[60711, '', 0, 'taxonomy ID, if not given, query argument organism against tax db'],\
-							('version', 0, int):[1, '', 0, 'which version'],\
+							('tax_id', 0, int):[60711, '', 1, 'taxonomy ID, if not given, query argument organism against tax db'],\
+							('version', 0, int):[1, '', 1, 'which version'],\
 							('run_type', 1, int):[1, 'y', 1, 'run type. 1: genBank fasta files. 2: scaffolds from WUSTL. 3: fully sequenced vervet BACs. 4: fully--sequence_nameequenced vervet BAC ends'],\
 							('maxNoOfFastaRecords', 1, int):[500, 'x', 1, 'maximum number of fasta records to be inserted (in the input file order)'],\
 							})
@@ -92,7 +99,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		2008-07-06
 			use the firstline (header) of the fasta file to extract which chromosome. using filename is unreliable.
 		"""
-		AbstractDBInteractingClass.__init__(self, inputFnameLs=inputFnameLs, **keywords)
+		AbstractDBInteractingJob.__init__(self, inputFnameLs=inputFnameLs, **keywords)
 		#self.connectDB() called within its __init__()
 		
 		
@@ -254,7 +261,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 				continue
 			headerData = self.parseFastaDescriptionDict[run_type](line, self.FigureOutTaxID_ins)
 			
-			if tax_id is not None and tax_id!=headerData.tax_id:
+			if tax_id is not None and headerData.tax_id and tax_id!=headerData.tax_id:
 				sys.stderr.write("tax_id (%s) not matching the one given (%s). Ignore.\n"%(headerData.tax_id, tax_id))
 				line = inf.readline()
 				new_fasta_block = 1
@@ -274,8 +281,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 				new_fasta_block = 1
 				continue
 			if aa_attr_instance is None:
-				aa_attr_instance = AnnotAssembly()
-				db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession =None, \
+				aa_attr_instance = db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession =None, \
 						version =None, tax_id=tax_id, chromosome =chromosome, \
 						start =start, stop =None, orientation=None, sequence = None,\
 						raw_sequence_start_id=None, original_path=os.path.abspath(filename),\
@@ -318,7 +324,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 			if no_of_fasta_blocks>=maxNoOfFastaRecords:
 				break
 		if self.report:
-			sys.stderr.write("Number of fasta blocks: %s.\n"%(no_of_fasta_blocks))
+			sys.stderr.write("  Number of fasta blocks/chromosomes: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
 	def connectDB(self):
@@ -348,7 +354,8 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		for filename in self.inputFnameLs:
 			sys.stderr.write("%d/%d:\t%s\n"%(self.inputFnameLs.index(filename)+1,\
 											len(self.inputFnameLs),filename))
-			self.parse_chromosome_fasta_file(db=self.db, filename=filename, tax_id=self.tax_id, \
+			self.parse_chromosome_fasta_file(db=self.db, filename=filename, tax_id=self.tax_id, version=self.version, \
+											 chunk_size=10000, \
 									sequence_type_name=self.sequence_type_name, \
 									sequence_type_id=self.sequence_type_id,\
 									run_type=self.run_type, maxNoOfFastaRecords=self.maxNoOfFastaRecords)
