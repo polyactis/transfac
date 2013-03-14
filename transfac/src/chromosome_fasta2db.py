@@ -323,8 +323,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 			no_of_fasta_blocks += 1
 			if no_of_fasta_blocks>=maxNoOfFastaRecords:
 				break
-		if self.report:
-			sys.stderr.write("  Number of fasta blocks/chromosomes: %s.\n"%(no_of_fasta_blocks))
+		sys.stderr.write("  Number of fasta blocks/chromosomes: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
 	def connectDB(self):
@@ -352,7 +351,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		session = self.db.session
 		session.begin()
 		for filename in self.inputFnameLs:
-			sys.stderr.write("%d/%d:\t%s\n"%(self.inputFnameLs.index(filename)+1,\
+			sys.stderr.write("%d/%d:\t%s "%(self.inputFnameLs.index(filename)+1,\
 											len(self.inputFnameLs),filename))
 			self.parse_chromosome_fasta_file(db=self.db, filename=filename, tax_id=self.tax_id, version=self.version, \
 											 chunk_size=10000, \
