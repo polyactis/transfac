@@ -29,6 +29,12 @@ Examples:
 		--tax_id 60711 -x 10000
 		-i ~/mnt//hoffman2/u/home/eeskin2/polyacti/NetworkData/vervet/raw_sequence/wustl_gxfer1_78364318756303_ref6.0.3/supercontigs.fasta.gz
 		--db_passwd secret --version 2
+	#2013.04.12
+	%s -u yh --schema genome --dbname vervetdb --drivername postgresql
+		--commit -y4 --sequence_type_id 1 -z uclaOffice --tax_id 60711
+		-x 10000
+		-i ~/mnt/hoffman2/u/home/eeskin2/polyacti/NetworkData/vervet/raw_sequence/Chlorocebus_sabaeus_1.0/Chlorocebus_sabaeus_1.0.fasta
+		--version 1
 
 Description:
 	Parse the chromosome sequence files (fasta format) downloaded from
@@ -46,7 +52,7 @@ Description:
 """
 
 import sys, getopt, os, re, gzip
-__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__%(sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 
 sys.path.insert(0, os.path.expanduser('~/lib/python'))
 sys.path.insert(0, os.path.join(os.path.expanduser('~/script')))
@@ -82,11 +88,14 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 	option_default_dict = AbstractDBInteractingJob.option_default_dict.copy()
 	option_default_dict.update({
 							('organism', 0, ): [None, 'g', 1, '2-letter abbreviation for organism. Optional, if specified, only sequence from this organism would be extracted.'],\
-							('sequence_type_id', 0, int):[9, '', 1, 'used to fetch chromosome info from GenomeDB'],\
-							('sequence_type_name', 0, ):[None, 's', 1, 'column type in table sequence_type'],\
+							('sequence_type_id', 0, int):[9, '', 1, 'column SequenceType.id in database GenomeDB'],\
+							('sequence_type_name', 0, ):[None, 's', 1, 'column SequenceType.short_name'],\
 							('tax_id', 0, int):[60711, '', 1, 'taxonomy ID, if not given, query argument organism against tax db'],\
 							('version', 0, int):[1, '', 1, 'which version'],\
-							('run_type', 1, int):[1, 'y', 1, 'run type. 1: genBank fasta files. 2: scaffolds from WUSTL. 3: fully sequenced vervet BACs. 4: fully--sequence_nameequenced vervet BAC ends'],\
+							('run_type', 1, int):[1, 'y', 1, 'run type. 1: genBank fasta files. \n\
+							2: scaffolds from WUSTL. \n\
+							3: fully sequenced vervet BACs. \n\
+							4: fully-assembled vervet ref genome from WUSTL. '],\
 							('maxNoOfFastaRecords', 1, int):[500, 'x', 1, 'maximum number of fasta records to be inserted (in the input file order)'],\
 							})
 	option_default_dict[('schema', 0, )][0] = 'genome'
@@ -116,8 +125,10 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		self.p_chromosome = re.compile(r'chromosome (\w+)[,\n\r]?')	#the last ? means [,\n\r] is optional
 		self.p_acc_ver = re.compile(r'(\w+)\.(\d+)')
 		
-		self.parseFastaDescriptionDict = {1: self.parseFastaDescriptionForGenBank, 2: self.parseFastaDescriptionForWUSTLVervetScaffolds,
-										3: self.parseFastaDescriptionForFullVervetBACs}
+		self.parseFastaDescriptionDict = {1: self.parseFastaDescriptionForGenBank, \
+										2: self.parseFastaDescriptionForWUSTLVervetScaffolds,\
+										3: self.parseFastaDescriptionForFullVervetBACs,\
+										4: self.parseFastaDescriptionForWUSTLVervetChromosomeGenome}
 	
 	def saveRawSequence(self, session, seq_to_db, passingdata, aa_attr_instance):
 		"""
@@ -192,6 +203,26 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
 	
 	
+	def parseFastaDescriptionForWUSTLVervetChromosomeGenome(self, descriptionLine=None, FigureOutTaxID_ins=None):
+		"""
+		2013.04.12 header looks like, CAE stands for C. aethiops:
+		
+			>CAE1
+			GTGAAAGAAGCCAAAAAG
+			
+		"""
+		header = descriptionLine[1:-1]	#discard '>' and '\n'
+		header = header.split()
+		p_chromosome = re.compile(r'CAE([\dXYxy]+)')
+		if p_chromosome.search(header[0]) is not None:
+			chromosome = p_chromosome.search(header[0]).groups()[0]
+		else:
+			chromosome = None
+		gi = None
+		acc_ver = None
+		comment = None
+		return PassingData(tax_id=None, gi=gi, comment=comment, acc_ver=acc_ver, chromosome=chromosome)
+	
 	def parseFastaDescriptionForFullVervetBACs(self, descriptionLine=None, FigureOutTaxID_ins=None):
 		"""
 		2011-7-6
@@ -260,7 +291,10 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 						break	#start from while again
 				continue
 			headerData = self.parseFastaDescriptionDict[run_type](line, self.FigureOutTaxID_ins)
-			
+			if not headerData.chromosome:
+				sys.stderr.write("Error chromosome for header %s is empty %s.\n"%(line, headerData.chromosome))
+				import pdb
+				pdb.set_trace()
 			if tax_id is not None and headerData.tax_id and tax_id!=headerData.tax_id:
 				sys.stderr.write("tax_id (%s) not matching the one given (%s). Ignore.\n"%(headerData.tax_id, tax_id))
 				line = inf.readline()
