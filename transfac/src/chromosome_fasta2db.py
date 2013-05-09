@@ -205,6 +205,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 	
 	def parseFastaDescriptionForWUSTLVervetChromosomeGenome(self, descriptionLine=None, FigureOutTaxID_ins=None):
 		"""
+		2013.05.09 include 'CAE' in the chromosome ID name.
 		2013.04.12 header looks like, CAE stands for C. aethiops:
 		
 			>CAE1
@@ -213,7 +214,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 		"""
 		header = descriptionLine[1:-1]	#discard '>' and '\n'
 		header = header.split()
-		p_chromosome = re.compile(r'CAE([\dXYxy]+)')
+		p_chromosome = re.compile(r'(CAE[\dXYxy]+)')
 		if p_chromosome.search(header[0]) is not None:
 			chromosome = p_chromosome.search(header[0]).groups()[0]
 		else:
