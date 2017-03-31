@@ -317,7 +317,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 				continue
 			if aa_attr_instance is None:
 				aa_attr_instance = db.getAnnotAssembly(gi=headerData.gi, acc_ver=headerData.acc_ver, accession =None, \
-						version =None, tax_id=tax_id, chromosome =chromosome, \
+						version =version, tax_id=tax_id, chromosome =chromosome, \
 						start =start, stop =None, orientation=None, sequence = None,\
 						raw_sequence_start_id=None, original_path=os.path.abspath(filename),\
 						sequence_type_id=sequence_type.id, \
@@ -358,7 +358,7 @@ class chromosome_fasta2db(AbstractDBInteractingJob):
 			no_of_fasta_blocks += 1
 			if no_of_fasta_blocks>=maxNoOfFastaRecords:
 				break
-		sys.stderr.write("  Number of fasta blocks/chromosomes: %s.\n"%(no_of_fasta_blocks))
+		sys.stderr.write("  Number of fasta records/chromosomes: %s.\n"%(no_of_fasta_blocks))
 		del inf
 	
 	def connectDB(self):
